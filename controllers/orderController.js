@@ -2,6 +2,13 @@
 const Order = require('../models/order');
 const Service = require('../models/service');
 
+// DISPLAY ALL ORDERS ASSOCIATED WITH USER
+module.exports.displayOrders = async (req, res) => {
+    // AUTH TO BE IMPLEMENTED
+    const orders = await Order.find({});
+    res.render('orders/ordersPage', { orders });
+}
+
 // DISPLAY CREATE ORDER FORM
 module.exports.renderCreateOrderForm = async (req, res) => {
     const services = await Service.find({});
@@ -13,7 +20,6 @@ const generateOrderNumber = () => {
     const timestamp = Date.now().toString().slice(-6);
     const random = Math.random().toString(36).substr(2, 4).toUpperCase();
     const orderNumber = `${timestamp}${random}`;
-    //console.log(orderNumber);
     return orderNumber;
 };
 
