@@ -1,8 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
+const ejsMate = require('ejs-mate');
 
-// REQUIRE ENVIRONMENT VARIABLES
+// IMPORT ENVIRONMENT VARIABLES
 require('dotenv').config();
+
+// IMPORT API ROUTES
+const orderRoutes = require('./routes/orderRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
@@ -16,10 +22,22 @@ db.once('open', () => {
     console.log('Connected to MongoDB Atlas.');
 });
 
+// SET VIEW ENGINE
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.engine('ejs', ejsMate);
+
+// MIDDLEWARE
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
 // API ROUTES
 app.get('/', (req, res) => {
-    res.send('Hello :)');
+    res.send('WashCubes :P');
 });
+app.use('/', orderRoutes);
+app.use('/', serviceRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select Order Items</title>
+  </head>
+  <body>
+    <h1>Select Your Items</h1>
+    <h2>Service Selected: <%= service.name %></h2>
+    <hr />
+    <!-- SELECT ITEMS -->
+    <form action="/order/submitOrder" method="POST">
+      <% for (item of service.items) { %>
+      <div>
+        <h3><%= item.name %></h3>
+        <h4>RM<%= item.price %>/<%= item.unit %></h4>
+        <label for="<%= item._id %>">Quantity</label>
+        <input
+          type="number"
+          id="<%= item._id %>"
+          class="quantity-input"
+          name="quantity[<%= item._id %>]"
+          data-price="<%= item.price %>"
+          min="0"
+          value="0"
+        />
+      </div>
+      <% } %>
+      <input type="hidden" name="service" value="<%= service._id %>" />
+      <hr />
+
+      <!-- CHECKOUT -->
+      <h2>Estimated Price: RM<span id="est-price">0.00</span></h2>
+      <input type="submit" value="Check Out" />
+    </form>
+
+    <!-- CALCULATE ESTIMATED PRICE -->
+    <script>
+      let quantityInputs;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        quantityInputs = document.querySelectorAll('.quantity-input');
+
+        quantityInputs.forEach(function (input) {
+          input.addEventListener('input', updateEstPrice);
+        });
+      });
+
+      function updateEstPrice() {
+        let estPrice = 0;
+        for (let input of quantityInputs) {
+          const quantity = parseInt(input.value, 10) || 0;
+          const itemPrice = parseFloat(input.getAttribute('data-price')) || 0;
+          estPrice += quantity * itemPrice;
+        }
+
+        // Update the total price on the page
+        document.getElementById('est-price').textContent = estPrice.toFixed(2);
+      }
+    </script>
+  </body>
+</html>
