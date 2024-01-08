@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const ejsMate = require('ejs-mate');
+const body_parser = require('body-parser');
 
 // IMPORT ENVIRONMENT VARIABLES
 require('dotenv').config();
@@ -9,16 +10,17 @@ require('dotenv').config();
 // IMPORT API ROUTES
 const orderRoutes = require('./routes/orderRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
 const app = express();
 
 // DATABASE CONNECTION
-mongoose.connect(process.env.DB_CONNECT);
+mongoose.connect('mongodb+srv://ivantan:ivantan123@cluster0.isivwp4.mongodb.net/?retryWrites=true&w=majority');
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB Atlas connection error:'));
-db.once('open', () => {
+db.on('open', () => {
     console.log('Connected to MongoDB Atlas.');
 });
 
@@ -31,6 +33,7 @@ app.engine('ejs', ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(body_parser.json());
 
 // API ROUTES
 app.get('/', (req, res) => {
@@ -38,9 +41,11 @@ app.get('/', (req, res) => {
 });
 app.use('/', orderRoutes);
 app.use('/', serviceRoutes);
+app.use('/', userRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {
-    console.log(`Server is runnning on Port ${PORT}`);
+    console.log(`Server is runnning on Port http://localhost:${PORT}`);
 })
 
+module.exports = app;
