@@ -1,11 +1,11 @@
 const UserModel = require('../models/user')
 
 class UserServices {
-    static async registerUser(phoneNumber){
+    static async registerUser(phoneNumber) {
         try {
-            const createUser = new UserModel({phoneNumber});
+            const createUser = new UserModel({ phoneNumber });
             return await createUser.save();
-        } catch(error){
+        } catch (error) {
             throw error;
         }
     }
