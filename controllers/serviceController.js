@@ -2,10 +2,10 @@
 const Service = require('../models/service');
 
 // GET ALL AVAILABLE SERVICES
-module.exports.getAllServices = async (req, res) => {
+module.exports.getServices = async (req, res) => {
     try {
         const services = await Service.find();
-        res.render('services/index', { services });
+        res.status(200).json({ services });
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }

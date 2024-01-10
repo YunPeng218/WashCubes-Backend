@@ -1,12 +1,22 @@
 
 const Order = require('../models/order');
 const Service = require('../models/service');
+const Locker = require('../models/locker');
+
+const { getAvailableCompartment } = require('../controllers/lockerController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayOrders = async (req, res) => {
     // AUTH TO BE IMPLEMENTED
     const orders = await Order.find({});
     res.render('orders/ordersPage', { orders });
+}
+
+// CHECK AVAILABILITY FOR SELECTED LOCKER SITE
+module.exports.getLockerCompartment = async (req, res) => {
+    const { selectedLockerSiteId, selectedSize } = req.body;
+    const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
+    res.status(200).json({ allocatedCompartment });
 }
 
 // DISPLAY CREATE ORDER FORM

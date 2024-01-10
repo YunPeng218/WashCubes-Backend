@@ -11,6 +11,7 @@ require('dotenv').config();
 const orderRoutes = require('./routes/orderRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const userRoutes = require('./routes/userRoutes');
+const lockerRoutes = require('./routes/lockerRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
@@ -42,6 +43,7 @@ app.get('/', (req, res) => {
 app.use('/', orderRoutes);
 app.use('/', serviceRoutes);
 app.use('/', userRoutes);
+app.use('/', lockerRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {
