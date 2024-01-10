@@ -9,6 +9,7 @@ const otpGenerator = require('otp-generator')
 //const authToken = '917170b20d98df23fb72ade2fc2a4668';
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+
 const client = require('twilio')(accountSid, authToken);
 
 exports.otpVerification = async (req, res, next) => {
@@ -18,9 +19,9 @@ exports.otpVerification = async (req, res, next) => {
         otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
         client.messages
             .create({
-                body: otpGenerated + ' is your OTP code.',
-                from: 'whatsapp:+14155238886',
-                to: 'whatsapp:+6' + phoneNumber
+            body: otpGenerated +' is your OTP code.',
+            from: 'whatsapp:+14155238886',
+            to: 'whatsapp:+'+phoneNumber
             });
     } catch (error) {
         console.log("---> err -->", error);
