@@ -33,6 +33,18 @@ const orderSchema = new mongoose.Schema({
         type: String,
         unique: true
     },
+    locker: {
+        lockerSiteId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Locker',
+        },
+        compartmentId: {
+            type: String,
+        },
+        compartmentNumber: {
+            type: String,
+        }
+    },
     service: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Service',

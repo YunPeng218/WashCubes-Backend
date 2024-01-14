@@ -5,10 +5,10 @@ require('dotenv').config();
 //const UserServices = require('../services/userServices')
 const UserModel = require('../models/user')
 const otpGenerator = require('otp-generator')
-const accountSid = 'ACd5af2db3ad62473f9cff03b7ec2753a3';
-const authToken = 'e9339a6011e2d5c02c3a9af0eb611e55';
-// const accountSid = process.env.TWILIO_ACCOUNT_SID;
-// const authToken = process.env.TWILIO_AUTH_TOKEN;
+//const accountSid = 'ACd5af2db3ad62473f9cff03b7ec2753a3';
+//const authToken = 'e9339a6011e2d5c02c3a9af0eb611e55';
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 const client = require('twilio')(accountSid, authToken);
 let currentNum, otpGenerated = null;
@@ -19,16 +19,17 @@ function sleep(ms) {
 
 exports.otpVerification = async (req, res, next) => {
     try {
-        if (currentNum==null) {
+        if (currentNum == null) {
             const { phoneNumber } = req.body;
             currentNum = phoneNumber;
         }
+        console.log('Called');
         otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
         client.messages
             .create({
-            body: otpGenerated +' is your OTP code. The OTP code generated is valid for 1 minute.',
-            from: 'whatsapp:+14155238886',
-            to: 'whatsapp:+'+currentNum
+                body: otpGenerated + ' is your OTP code. The OTP code generated is valid for 1 minute.',
+                from: 'whatsapp:+14155238886',
+                to: 'whatsapp:+' + currentNum
             });
         await sleep(60000)
         otpGenerated = null;
@@ -45,7 +46,7 @@ exports.register = async (req, res, next) => {
             //await UserServices.registerUser(number);
             await registerUser(currentNum);
             res.json({ status: true, success: "Correct OTP & Registered Successfully" });
-        } else 
+        } else
             res.json({ status: false, success: "Wrong OTP" });
     } catch (error) {
         console.log("---> err -->", error);

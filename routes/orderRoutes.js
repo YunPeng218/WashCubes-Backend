@@ -5,10 +5,12 @@ const orderController = require('../controllers/orderController');
 
 router.get('/orders', orderController.displayOrders)
 
-router.get('/orders/create', orderController.renderCreateOrderForm);
-
 router.post('/orders/select-locker-site', orderController.getLockerCompartment);
 
-router.post('/orders/confirmOrder', orderController.confirmOrder);
+router.post('/orders/create-order', orderController.createOrder);
+
+router.post('/orders/confirm-order', orderController.confirmOrder);
+
+router.post('/orders/cancel-order-creation', orderController.cancelOrderCreation);
 
 module.exports = router;

@@ -10,24 +10,26 @@ module.exports.getLockers = async (req, res) => {
 // ALLOCATE A COMPARTMENT
 module.exports.getAvailableCompartment = async (selectedLockerSiteId, selectedSize) => {
     const locker = await Locker.findById(selectedLockerSiteId);
-    if (!locker) throw new Error('Locker not found.');
+    if (!locker) throw new Error('Locker site not found.');
 
     let selectedCompartment = locker.compartments.find(compartment => compartment.size === selectedSize && compartment.isAvailable);
-
-    // FIND NEXT BIGGEST IF CURRENT SIZE IS FULL
-    if (!selectedCompartment) {
+    if (selectedCompartment) {
+        selectedCompartment.isAvailable = false;
+        await locker.save();
+    } else {
         const sizes = ['Medium', 'Large', 'Extra Large']; // Customize this array based on your size hierarchy
         for (const size of sizes) {
-            selectedCompartment = compartments.find(compartment => compartment.size === size && compartment.isAvailable);
-            if (selectedCompartment) break;
+            selectedCompartment = locker.compartments.find(compartment => compartment.size === size && compartment.isAvailable);
+            if (selectedCompartment) {
+                selectedCompartment.isAvailable = false;
+                await locker.save();
+                break;
+            }
         }
     }
 
-    if (selectedCompartment) {
-        return selectedCompartment;
-    } else {
-        throw new Error('No available compartments found.');
-    }
+    console.log(selectedCompartment)
+    return selectedCompartment;
 }
 
 // GET AVAILABLE COMPARTMENTS
@@ -46,5 +48,6 @@ module.exports.getAvailableCompartments = async (lockerSiteId) => {
         console.error(error);
     }
 }
+
 
 

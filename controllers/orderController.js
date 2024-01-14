@@ -2,27 +2,38 @@
 const Order = require('../models/order');
 const Service = require('../models/service');
 const Locker = require('../models/locker');
-
 const { getAvailableCompartment } = require('../controllers/lockerController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayOrders = async (req, res) => {
-    // AUTH TO BE IMPLEMENTED
+    // AUTH
     const orders = await Order.find({});
-    res.render('orders/ordersPage', { orders });
 }
 
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
     const { selectedLockerSiteId, selectedSize } = req.body;
     const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
-    res.status(200).json({ allocatedCompartment });
+    console.log(allocatedCompartment)
+    if (allocatedCompartment) {
+        res.status(200).json({ allocatedCompartment });
+    } else {
+        res.status(404).json({});
+    }
 }
 
-// DISPLAY CREATE ORDER FORM
-module.exports.renderCreateOrderForm = async (req, res) => {
-    const services = await Service.find({});
-    res.render('orders/createOrder', { services });
+// CREATE A NEW ORDER
+module.exports.createOrder = async (req, res) => {
+    try {
+        const orderData = req.body;
+        const newOrderNumber = generateOrderNumber();
+        const order = await createOrderObject(orderData, newOrderNumber);
+        const newOrder = new Order(order);
+        res.status(200).json({ newOrder });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 // GENERATE ORDER NUMBER
@@ -33,44 +44,33 @@ const generateOrderNumber = () => {
     return orderNumber;
 };
 
-// CREATE A NEW ORDER
-module.exports.createOrder = async (req, res) => {
-    try {
-        const formData = req.body;
-        const order = await createOrderObject(formData);
-        const newOrder = new Order(order);
-        newOrder.orderNumber = generateOrderNumber();
-        newOrder.service = formData.service;
-        const service = await Service.findById({ _id: formData.service });
-        res.render('orders/orderSummary', { order: newOrder, service })
-    } catch (error) {
-        console.error('Error creating order:', error);
-        res.status(500).send('Internal Server Error');
-    }
-}
-
 // CREATE ORDER OBJECT FROM FORM DATA
-const createOrderObject = async (formData) => {
+const createOrderObject = async (orderData, orderNumber) => {
+    const { serviceId, lockerSiteId, compartmentId, compartmentNumber } = orderData;
     const orderItems = [];
-
-    // ADD SELECTED ITEMS INTO ORDER
-    for (const [itemId, quantity] of Object.entries(formData.quantity)) {
-        if (quantity == 0) continue;
-        const item = await findItemById(formData.service, itemId);
-        const orderItem = {
+    for (const orderItem of orderData.orderItems) {
+        if (orderItem.quantity == 0) continue;
+        const item = await findItemById(orderData.serviceId, orderItem.itemId);
+        const orderItemDetails = {
             name: item.name,
             unit: item.unit,
             price: item.price,
-            quantity: parseInt(quantity, 10) || 0,
-            cumPrice: item.price * quantity,
+            quantity: parseInt(orderItem.quantity, 10),
+            cumPrice: item.price * orderItem.quantity,
         };
-        orderItems.push(orderItem);
+        orderItems.push(orderItemDetails);
     }
-
-    const order = {
+    const newOrder = {
+        orderNumber,
+        locker: {
+            lockerSiteId,
+            compartmentId,
+            compartmentNumber,
+        },
+        service: serviceId,
         orderItems,
     };
-    return order;
+    return newOrder;
 }
 
 // GET DETAILS OF A SPECIFIC ITEM WITHIN A SERVICE
@@ -89,19 +89,30 @@ const findItemById = async (serviceId, itemId) => {
     }
 }
 
-
-
-
 // SAVE ORDER TO DATABASE AFTER USER CONFIRMATION
 module.exports.confirmOrder = async (req, res) => {
     try {
-        const { order } = req.body;
-        const newOrder = new Order(JSON.parse(order));
-        console.log(newOrder);
+        const order = req.body;
+        const existingOrder = await Order.findOne({ orderNumber: order.orderNumber });
+        if (existingOrder) {
+            return res.status(500).json({ message: 'Order with same order number exists.' });
+        }
+        const newOrder = new Order(order);
         await newOrder.save();
-        res.send('Order saved successfully.')
+        res.status(200).json({ message: 'Order saved successfully' });
     } catch (error) {
         console.error('Error confirming order:', error);
         res.status(500).send('Internal Server Error');
     }
+}
+
+// CANCEL ORDER
+module.exports.cancelOrderCreation = async (req, res) => {
+    const { lockerSiteId, compartmentId } = req.body;
+    const locker = await Locker.findById(lockerSiteId).exec();
+    let compartment = locker.compartments.find(compartment => compartment._id.toString() === compartmentId);
+    if (!compartment) throw new Error('Compartment not found.');
+    compartment.isAvailable = true;
+    await locker.save();
+    res.status(200).json({ message: 'Order Cancelled' });
 }
