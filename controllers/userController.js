@@ -9,6 +9,7 @@ const otpGenerator = require('otp-generator')
 //const authToken = 'e9339a6011e2d5c02c3a9af0eb611e55';
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+const UserServices = require('../services/userServices');
 
 const client = require('twilio')(accountSid, authToken);
 let currentNum, otpGenerated = null;
@@ -17,7 +18,7 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-exports.otpVerification = async (req, res, next) => {
+exports.otpGenerate = async (req, res, next) => {
     try {
         if (currentNum == null) {
             const { phoneNumber } = req.body;
@@ -39,28 +40,18 @@ exports.otpVerification = async (req, res, next) => {
     }
 }
 
-exports.register = async (req, res, next) => {
+exports.otpVerification = async (req, res, next) => {
     try {
         const { otpRes } = req.body;
         if (otpGenerated == otpRes) {
-            //await UserServices.registerUser(number);
-            await registerUser(currentNum);
-            res.json({ status: true, success: "Correct OTP & Registered Successfully" });
+            const user = await UserServices.registerUser(currentNum);
+            let tokenData = { _id: user._id };
+            const token = await UserServices.generateToken(tokenData, "secretKey")
+            res.status(200).json({ status: true, token: token })
         } else
-            res.json({ status: false, success: "Wrong OTP" });
+            res.json({ status: false });
     } catch (error) {
         console.log("---> err -->", error);
         next(error);
-    }
-}
-
-const registerUser = async (phoneNumber) => {
-    try {
-        const existingUser = await UserModel.findOne({ phoneNumber });
-        if (existingUser) return;
-        const createUser = new UserModel({ phoneNumber });
-        await createUser.save();
-    } catch (error) {
-        throw error;
     }
 }
