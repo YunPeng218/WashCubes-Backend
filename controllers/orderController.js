@@ -5,9 +5,13 @@ const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
-module.exports.displayOrders = async (req, res) => {
-    // AUTH
-    const orders = await Order.find({});
+module.exports.displayUserOrders = async (req, res) => {
+    const userId = req.query.userId;
+    const orders = await Order.find({
+        'user.userId': userId,
+        orderStatus: { $ne: 'Completed' }
+    });
+    res.status(200).json({ orders });
 }
 
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE

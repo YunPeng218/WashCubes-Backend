@@ -21,9 +21,14 @@ module.exports.getAvailableCompartment = async (selectedLockerSiteId, selectedSi
         for (const size of sizes) {
             selectedCompartment = locker.compartments.find(compartment => compartment.size === size && compartment.isAvailable);
             if (selectedCompartment) {
-                selectedCompartment.isAvailable = false;
-                await locker.save();
-                break;
+                if (sizes.indexOf(selectedCompartment.size) >= sizes.indexOf(selectedSize)) {
+                    selectedCompartment.isAvailable = false;
+                    await locker.save();
+                    break;
+                } else {
+                    // The found compartment is smaller than the desired size, continue searching
+                    selectedCompartment = null;
+                }
             }
         }
     }

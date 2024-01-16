@@ -45,13 +45,40 @@ exports.otpVerification = async (req, res, next) => {
         const { otpRes } = req.body;
         if (otpGenerated == otpRes) {
             const user = await UserServices.registerUser(currentNum);
-            let tokenData = { _id: user._id };
+            let tokenData = { _id: user._id, phoneNumber: user.phoneNumber };
             const token = await UserServices.generateToken(tokenData, "secretKey")
             res.status(200).json({ status: true, token: token })
         } else
             res.json({ status: false });
     } catch (error) {
         console.log("---> err -->", error);
+        next(error);
+    }
+}
+
+exports.getUserDetails = async (req, res, next) => {
+    try {
+        const userId = req.query.userId;
+        const user = await UserModel.findById(userId);
+        if (user) res.status(200).json({ user });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+exports.editUserDetails = async (req, res, next) => {
+    try {
+        const { userId, name, email } = req.body;
+        const user = await UserModel.findById(userId);
+        if (user) {
+            user.name = name;
+            user.email = email;
+            user.save();
+            res.status(200).json({ user });
+        }
+    } catch (error) {
+        console.error(error);
         next(error);
     }
 }

@@ -33,6 +33,17 @@ const orderSchema = new mongoose.Schema({
         type: String,
         unique: true
     },
+    user: {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        phoneNumber: {
+            type: Number,
+            required: true,
+        }
+    },
     locker: {
         lockerSiteId: {
             type: mongoose.Schema.Types.ObjectId,

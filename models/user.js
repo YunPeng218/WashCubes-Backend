@@ -6,6 +6,12 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Phone number can't be empty"],
         unique: true,
+    },
+    name: {
+        type: String,
+    },
+    email: {
+        type: String,
     }
 });
 

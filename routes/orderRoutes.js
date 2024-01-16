@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true });
 
 const orderController = require('../controllers/orderController');
 
-router.get('/orders', orderController.displayOrders)
+router.get('/orders/user', orderController.displayUserOrders)
 
 router.post('/orders/select-locker-site', orderController.getLockerCompartment);
 

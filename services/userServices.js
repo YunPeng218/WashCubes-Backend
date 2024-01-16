@@ -21,7 +21,6 @@ class UserServices {
     static async generateToken(tokenData, secretKey) {
         return jwt.sign(tokenData, secretKey);
     }
-
 }
 
 module.exports = UserServices;
