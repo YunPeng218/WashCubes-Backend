@@ -5,4 +5,6 @@ const lockerController = require('../controllers/lockerController');
 
 router.get('/lockers', lockerController.getLockers);
 
+router.get('/compartments', lockerController.getAvailableCompartments);
+
 module.exports = router;

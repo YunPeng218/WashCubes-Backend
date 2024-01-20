@@ -38,21 +38,36 @@ module.exports.getAvailableCompartment = async (selectedLockerSiteId, selectedSi
 }
 
 // GET AVAILABLE COMPARTMENTS
-module.exports.getAvailableCompartments = async (lockerSiteId) => {
+module.exports.getAvailableCompartments = async (req, res) => {
     try {
+        const lockerSiteId = req.query.lockerSiteId;
         const locker = await Locker.findById(lockerSiteId);
         if (!locker) return;
-        const compartments = locker.compartments.filter(compartment => compartment.isAvailable);
-        const response = {
+
+        // Group compartments by size and count available compartments for each size
+        const availableCompartmentsBySize = locker.compartments.reduce((acc, compartment) => {
+            if (compartment.isAvailable) {
+                if (!acc[compartment.size]) {
+                    acc[compartment.size] = 1;
+                } else {
+                    acc[compartment.size]++;
+                }
+            }
+            return acc;
+        }, {});
+
+        const availableCompartments = {
             lockerId: locker._id,
             lockerName: locker.name,
-            compartments
-        }
-        return response;
+            availableCompartmentsBySize,
+        };
+
+        res.status(200).json({ availableCompartments });
     } catch (error) {
         console.error(error);
     }
-}
+};
+
 
 
 

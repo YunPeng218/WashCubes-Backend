@@ -50,7 +50,7 @@ const generateOrderNumber = () => {
 
 // CREATE ORDER OBJECT FROM FORM DATA
 const createOrderObject = async (orderData, orderNumber) => {
-    const { serviceId, lockerSiteId, compartmentId, compartmentNumber } = orderData;
+    const { serviceId, lockerSiteId } = orderData;
     const orderItems = [];
     for (const orderItem of orderData.orderItems) {
         if (orderItem.quantity == 0) continue;
@@ -68,8 +68,6 @@ const createOrderObject = async (orderData, orderNumber) => {
         orderNumber,
         locker: {
             lockerSiteId,
-            compartmentId,
-            compartmentNumber,
         },
         service: serviceId,
         orderItems,
@@ -103,7 +101,7 @@ module.exports.confirmOrder = async (req, res) => {
         }
         const newOrder = new Order(order);
         await newOrder.save();
-        res.status(200).json({ message: 'Order saved successfully' });
+        res.status(200).json({ newOrder });
     } catch (error) {
         console.error('Error confirming order:', error);
         res.status(500).send('Internal Server Error');
