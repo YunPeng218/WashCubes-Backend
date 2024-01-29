@@ -13,6 +13,7 @@ const serviceRoutes = require('./routes/serviceRoutes');
 const userRoutes = require('./routes/userRoutes');
 const lockerRoutes = require('./routes/lockerRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
@@ -46,6 +47,7 @@ app.use('/', serviceRoutes);
 app.use('/', userRoutes);
 app.use('/', lockerRoutes);
 app.use('/', notificationRoutes);
+app.use('/', feedbackRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {
