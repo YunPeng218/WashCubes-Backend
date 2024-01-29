@@ -4,10 +4,10 @@ require('dotenv').config();
 
 const UserModel = require('../models/user')
 const otpGenerator = require('otp-generator')
-// const accountSid = 'ACd5af2db3ad62473f9cff03b7ec2753a3';
-// const authToken = '0ac26d6ddac286157f605f206e59bff4';
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
+const accountSid = 'ACd5af2db3ad62473f9cff03b7ec2753a3';
+const authToken = '06c66ff38f2d2ffd43ac482067cd39ad';
+// const accountSid = process.env.TWILIO_ACCOUNT_SID;
+// const authToken = process.env.TWILIO_AUTH_TOKEN;
 const UserServices = require('../services/userServices');
 
 const client = require('twilio')(accountSid, authToken);
