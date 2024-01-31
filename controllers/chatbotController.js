@@ -32,14 +32,14 @@ const handleKeyword = (keyword) => {
   // Implement logic to handle predefined scripts
   switch (keyword.toLowerCase()) {
     case 'reserve locker':
-      return 'This is the answer for reserve locker.';
+      return 'Unfortunately, this service is currently unavailable. Please stay tuned for future updates.';
     case 'create order':
-      return 'This is the answer for create order.';
+      return 'To create an order, simply navigate to the order page of the app and press the "Create" button.';
     case 'user guide':
-      return 'This is the answer for user guide.';
+      return 'How-to Guide and Video on how to use the app are able to be found on our website.';
     case 'size guide':
-      return 'This is the answer for size guide.';
+      return 'Size guide are available on our website.';
     case 'price':
-      return 'This is the answer for price.';
+      return 'Pricing details are available on our website.';
   }
 }
