@@ -41,12 +41,13 @@ exports.otpVerification = async (req, res, next) => {
     try {
         const { otpRes } = req.body;
         if (otpGenerated == otpRes) {
-            const user = await UserServices.registerUser(currentNum);
+            const {user, isNewUser} = await UserServices.validateUser(currentNum);
             let tokenData = { _id: user._id, phoneNumber: user.phoneNumber };
             const token = await UserServices.generateToken(tokenData, "secretKey")
-            res.status(200).json({ status: true, token: token })
+            const status = isNewUser? "newUser" : "existingUser";
+            res.status(200).json({ status, token: token })
         } else
-            res.json({ status: false });
+            res.json({ status : 'wrongOTP'});
     } catch (error) {
         console.log("---> err -->", error);
         next(error);
