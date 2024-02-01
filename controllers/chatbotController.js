@@ -25,7 +25,7 @@ exports.handleUserInput = async (req, res, next) => {
 const checkForKeywords = (message) => {
   // Implement logic to check if the message contains any predefined keywords
   const keywords = ['reserve locker', 'create order', 'user guide', 'size guide', 'price'];
-  return keywords.some(keyword => message.toLowerCase().includes(keyword));
+  return keywords.some(keyword => message.toLowerCase() === keyword.toLowerCase());
 }
 
 const handleKeyword = (keyword) => {
