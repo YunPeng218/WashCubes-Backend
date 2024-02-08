@@ -56,11 +56,14 @@ module.exports.getAvailableCompartments = async (req, res) => {
             return acc;
         }, {});
 
+
         const availableCompartments = {
             lockerId: locker._id,
             lockerName: locker.name,
             availableCompartmentsBySize,
         };
+
+        console.log(availableCompartments);
 
         res.status(200).json({ availableCompartments });
     } catch (error) {
