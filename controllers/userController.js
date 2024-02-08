@@ -67,10 +67,11 @@ exports.getUserDetails = async (req, res, next) => {
 
 exports.editUserDetails = async (req, res, next) => {
     try {
-        const { userId, name, email } = req.body;
+        const { userId, name, phoneNumber, email } = req.body;
         const user = await UserModel.findById(userId);
         if (user) {
             user.name = name;
+            user.phoneNumber = phoneNumber;
             user.email = email;
             user.save();
             res.status(200).json({ user });

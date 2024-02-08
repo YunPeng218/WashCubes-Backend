@@ -27,8 +27,8 @@ const feedbackSchema = new mongoose.Schema({
     },
     starRating: {
         type: Number,
-        min: 1,
-        max: 5
+        min: 0.5,
+        max: 5.0
     },
     improvementCategories: [{
         type: [String],
