@@ -33,6 +33,7 @@ module.exports.createOrder = async (req, res) => {
         const newOrderNumber = generateOrderNumber();
         const order = await createOrderObject(orderData, newOrderNumber);
         const newOrder = new Order(order);
+        console.log(newOrder);
         res.status(200).json({ newOrder });
     } catch (error) {
         console.error('Error creating order:', error);

@@ -17,7 +17,7 @@ const seedServices = async () => {
         const services = [
             {
                 // BASIC LAUNDRY
-                name: 'Wash, Dry & Fold',
+                name: 'Wash & Fold',
                 items: [
                     { name: 'All Garments', unit: 'kg', price: 6 },
                     { name: 'Floor Mat', unit: 'kg', price: 8 },
@@ -26,8 +26,25 @@ const seedServices = async () => {
                 ]
             },
             {
-                // DRY CLEANING / HANDWASH
-                name: 'Dry Cleaning / Handwash',
+                // DRY CLEANING
+                name: 'Dry Cleaning',
+                items: [
+                    { name: 'Top', unit: 'pcs', price: 7 },
+                    { name: 'Bottom', unit: 'pcs', price: 7 },
+                    { name: 'Winter Jacket', unit: 'pcs', price: 25 },
+                    { name: 'Baju Kurung', unit: 'set', price: 20 },
+                    { name: 'Evening Gown', unit: 'pcs', price: 50 },
+                    { name: 'Wedding Gown', unit: 'pcs', price: 150 },
+                    { name: 'Dress', unit: 'pcs', price: 18 },
+                    { name: 'Saree/Punjabi Dress', unit: 'set', price: 30 },
+                    { name: 'Hijab/Scarf', unit: 'pcs', price: 6 },
+                    { name: 'Cap/Hat/Glove', unit: 'pcs', price: 6 },
+                    { name: 'Curtain', unit: 'kg', price: 18 },
+                ],
+            },
+            {
+                // HANDWASH
+                name: 'Handwash',
                 items: [
                     { name: 'Top', unit: 'pcs', price: 7 },
                     { name: 'Bottom', unit: 'pcs', price: 7 },
@@ -44,7 +61,7 @@ const seedServices = async () => {
             },
             {
                 // LAUNDRY & IRONING
-                name: 'Laundry & Ironing',
+                name: 'Laundry & Iron',
                 items: [
                     { name: 'Top', unit: 'pcs', price: 3 },
                     { name: 'Bottom', unit: 'pcs', price: 3 },
