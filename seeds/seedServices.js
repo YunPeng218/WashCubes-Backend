@@ -22,7 +22,8 @@ const seedServices = async () => {
                     { name: 'All Garments', unit: 'kg', price: 6 },
                     { name: 'Floor Mat', unit: 'kg', price: 8 },
                     { name: 'Curtain', unit: 'kg', price: 8 },
-                    { name: 'Bedsheet/Comforter Cover', unit: 'kg', price: 6 },
+                    { name: 'Bedsheet', unit: 'kg', price: 6 },
+                    { name: 'Quilt/Comforter', unit: 'kg', price: 6 },
                 ]
             },
             {

@@ -48,13 +48,22 @@ const orderSchema = new mongoose.Schema({
         lockerSiteId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Locker',
+            required: true,
         },
         compartmentId: {
             type: String,
+            required: true,
         },
         compartmentNumber: {
             type: String,
         }
+    },
+    collectionSite: {
+        lockerSiteId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Locker',
+            required: true,
+        },
     },
     service: {
         type: mongoose.Schema.Types.ObjectId,

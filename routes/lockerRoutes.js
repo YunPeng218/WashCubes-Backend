@@ -7,6 +7,8 @@ router.get('/lockers', lockerController.getLockers);
 
 router.get('/compartments', lockerController.getAvailableCompartments);
 
+router.post('/locker/release-compartment', lockerController.freeCompartment);
+
 router.get('/test-locker', (req, res) => {
     res.json({ locker: 'WOW' });
 });

@@ -1,4 +1,5 @@
 
+const { response } = require('express');
 const Locker = require('../models/locker');
 
 // GET LOCKERS
@@ -70,6 +71,28 @@ module.exports.getAvailableCompartments = async (req, res) => {
         console.error(error);
     }
 };
+
+// FREE UP COMPARTMENT
+module.exports.freeCompartment = async (req, res) => {
+    try {
+        console.log('FREE LOCKERS');
+        const { lockerSiteId, compartmentId } = req.body;
+        const locker = await Locker.findById(lockerSiteId);
+        if (!locker) throw new Error('Locker site not found.');
+
+        console.log(compartmentId);
+        const compartment = locker.compartments.find(compartment => compartment._id.toString() === compartmentId);
+        console.log(compartment);
+        if (!compartment) throw new Error('Compartment not found.');
+
+        compartment.isAvailable = true;
+        await locker.save();
+
+        res.status(200).json({ message: 'Successfully freed up compartment' });
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 
 
