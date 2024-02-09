@@ -42,7 +42,7 @@ exports.otpVerification = async (req, res, next) => {
         const { otpRes } = req.body;
         if (otpGenerated == otpRes) {
             const {user, isNewUser} = await UserServices.validateUser(currentNum);
-            let tokenData = { _id: user._id, phoneNumber: user.phoneNumber };
+            let tokenData = { _id: user._id, phoneNumber: user.phoneNumber};
             const token = await UserServices.generateToken(tokenData, "secretKey")
             const status = isNewUser? "newUser" : "existingUser";
             res.status(200).json({ status, token: token })
@@ -73,6 +73,21 @@ exports.editUserDetails = async (req, res, next) => {
             user.name = name;
             user.phoneNumber = phoneNumber;
             user.email = email;
+            user.save();
+            res.status(200).json({ user });
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
+
+exports.editUserProfilePic = async (req, res, next) => {
+    try {
+        const { userId, profilePicURL } = req.body;
+        const user = await UserModel.findById(userId);
+        if (user) {
+            user.profilePicURL = profilePicURL;
             user.save();
             res.status(200).json({ user });
         }

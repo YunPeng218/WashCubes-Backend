@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     phoneNumber: {
         type: Number,
-        required: [true, "Phone number can't be empty"],
+        required: true,
         unique: true,
     },
     name: {
@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+    },
+    profilePicURL: {
+        type: String,
+        default: 'https://res.cloudinary.com/ddweldfmx/image/upload/v1707480915/profilePic/zxltbifbulr4m45lbsqq.png'
     }
 });
 
