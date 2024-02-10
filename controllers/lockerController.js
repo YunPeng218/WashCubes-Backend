@@ -8,6 +8,25 @@ module.exports.getLockers = async (req, res) => {
     res.status(200).json({ lockers });
 }
 
+// GET DROP-OFF AND COLLECTION SITE
+module.exports.getDropAndCollectionSite = async (req, res) => {
+    console.log('GET DROP OFF AND COLLECTION SITE');
+    const { dropOffSiteId, collectionSiteId } = req.query;
+    console.log(dropOffSiteId);
+    console.log(collectionSiteId);
+
+    const dropOffLocker = await Locker.findById(dropOffSiteId);
+    const collectionLocker = await Locker.findById(collectionSiteId);
+
+    if (!dropOffLocker) throw new Error('Drop Off Locker site not found.');
+    if (!collectionLocker) throw new Error('Collection Locker site not found.');
+
+    res.status(200).json({
+        dropOffLocker,
+        collectionLocker,
+    });
+}
+
 // ALLOCATE A COMPARTMENT
 module.exports.getAvailableCompartment = async (selectedLockerSiteId, selectedSize) => {
     const locker = await Locker.findById(selectedLockerSiteId);
@@ -91,6 +110,7 @@ module.exports.freeCompartment = async (req, res) => {
         res.status(200).json({ message: 'Successfully freed up compartment' });
     } catch (error) {
         console.error(error);
+        res.status(500);
     }
 }
 

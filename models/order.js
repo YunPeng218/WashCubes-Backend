@@ -17,12 +17,11 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 // DEFINE ENUMS FOR ORDER STATUS
-const statusEnum = ['Pending Pick Up',
-    'Picked Up',
-    'Arrived at Laundry Site',
-    'Pending Verification',
-    'Processing',
-    'Departed from Laundry Site',
+const statusEnum = ['Pending Drop Off',
+    'Collected By Rider',
+    'In Progress',
+    'Processing Complete',
+    'Out For Delivery',
     'Ready for Collection',
     'Completed',
     'Order Error'];
@@ -78,14 +77,82 @@ const orderSchema = new mongoose.Schema({
         },
         min: 0,
     },
-    orderStatus: {
-        type: String,
-        enum: statusEnum,
-        default: 'Pending Pick Up'
+    orderStage: {
+        pendingDropOff: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        collectedByRider: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        inProgress: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        processingComplete: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        outForDelivery: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        readyForCollection: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        completed: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
+        orderError: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        },
     },
     createdAt: {
         type: Date,
-        default: Date.now,
     }
 });
 

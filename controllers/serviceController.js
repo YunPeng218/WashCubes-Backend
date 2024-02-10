@@ -14,8 +14,9 @@ module.exports.getServices = async (req, res) => {
 // GET DETAILS OF A SPECIFIC SERVICE
 module.exports.getServiceDetails = async (req, res) => {
     try {
+        console.log('GET SERVICE');
         const service = await Service.findById(req.params.serviceId);
-        res.render('orders/selectOrderItems', { service });
+        res.status(200).json({ service });
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }

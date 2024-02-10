@@ -5,6 +5,8 @@ const lockerController = require('../controllers/lockerController');
 
 router.get('/lockers', lockerController.getLockers);
 
+router.get('/locker/order-locker-sites', lockerController.getDropAndCollectionSite);
+
 router.get('/compartments', lockerController.getAvailableCompartments);
 
 router.post('/locker/release-compartment', lockerController.freeCompartment);

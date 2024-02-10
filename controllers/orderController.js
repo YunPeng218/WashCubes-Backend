@@ -16,6 +16,7 @@ module.exports.displayUserOrders = async (req, res) => {
 
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
+    console.log('GET LOCKER COMPARTMENT');
     const { selectedLockerSiteId, selectedSize } = req.body;
     const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
     console.log(allocatedCompartment)
@@ -33,7 +34,7 @@ module.exports.createOrder = async (req, res) => {
         const newOrderNumber = generateOrderNumber();
         const order = await createOrderObject(orderData, newOrderNumber);
         const newOrder = new Order(order);
-        console.log(newOrder);
+        console.log('SUCCESS', newOrder);
         res.status(200).json({ newOrder });
     } catch (error) {
         console.error('Error creating order:', error);
@@ -95,12 +96,19 @@ const findItemById = async (serviceId, itemId) => {
 // SAVE ORDER TO DATABASE AFTER USER CONFIRMATION
 module.exports.confirmOrder = async (req, res) => {
     try {
+        console.log('SAVE ORDER');
         const order = req.body;
         const existingOrder = await Order.findOne({ orderNumber: order.orderNumber });
         if (existingOrder) {
             return res.status(500).json({ message: 'Order with same order number exists.' });
         }
         const newOrder = new Order(order);
+        console.log(newOrder);
+
+        newOrder.orderStage.pendingDropOff.status = true;
+        newOrder.orderStage.pendingDropOff.dateUpdated = Date.now();
+        newOrder.createdAt = Date.now();
+
         await newOrder.save();
         res.status(200).json({ newOrder });
     } catch (error) {
