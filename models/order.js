@@ -78,7 +78,7 @@ const orderSchema = new mongoose.Schema({
         min: 0,
     },
     orderStage: {
-        pendingDropOff: {
+        dropOff: {
             status: {
                 type: Boolean,
                 default: false,

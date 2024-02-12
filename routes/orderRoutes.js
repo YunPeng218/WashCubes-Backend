@@ -13,4 +13,6 @@ router.post('/orders/confirm-order', orderController.confirmOrder);
 
 router.post('/orders/cancel-order-creation', orderController.cancelOrderCreation);
 
+router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
+
 module.exports = router;

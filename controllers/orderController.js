@@ -104,11 +104,7 @@ module.exports.confirmOrder = async (req, res) => {
         }
         const newOrder = new Order(order);
         console.log(newOrder);
-
-        newOrder.orderStage.pendingDropOff.status = true;
-        newOrder.orderStage.pendingDropOff.dateUpdated = Date.now();
         newOrder.createdAt = Date.now();
-
         await newOrder.save();
         res.status(200).json({ newOrder });
     } catch (error) {
@@ -126,4 +122,17 @@ module.exports.cancelOrderCreation = async (req, res) => {
     compartment.isAvailable = true;
     await locker.save();
     res.status(200).json({ message: 'Order Cancelled' });
+}
+
+// USER CONFIRMS DROP OFF 
+module.exports.confirmOrderDropOff = async (req, res) => {
+    const { orderId, lockerSiteId, compartmentId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('CONFIRM DROP OFF ERROR');
+
+    order.orderStage.dropOff.status = true;
+    order.orderStage.dropOff.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({ order });
 }
