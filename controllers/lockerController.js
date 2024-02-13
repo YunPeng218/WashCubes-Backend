@@ -114,6 +114,18 @@ module.exports.freeCompartment = async (req, res) => {
     }
 }
 
+module.exports.handleLockerQRScan = async (req, res) => {
+    try {
+        const { lockerSiteId } = req.query;
+        const locker = await Locker.findById(lockerSiteId);
+        if (!locker) throw new Error('Locker site not found.');
+        res.status(200).json({ locker });
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+    }
+}
+
 
 
 

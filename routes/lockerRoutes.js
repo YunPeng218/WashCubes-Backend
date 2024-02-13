@@ -15,4 +15,6 @@ router.get('/test-locker', (req, res) => {
     res.json({ locker: 'WOW' });
 });
 
+router.get('/locker/qr-code', lockerController.handleLockerQRScan);
+
 module.exports = router;
