@@ -27,6 +27,9 @@ const lockerSiteSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    address: {
+        type: String,
+    },
     location: {
         type: {
             type: String,

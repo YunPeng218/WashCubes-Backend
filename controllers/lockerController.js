@@ -5,6 +5,7 @@ const Locker = require('../models/locker');
 // GET LOCKERS
 module.exports.getLockers = async (req, res) => {
     const lockers = await Locker.find({});
+    console.log(lockers);
     res.status(200).json({ lockers });
 }
 

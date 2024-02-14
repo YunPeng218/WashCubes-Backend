@@ -114,3 +114,35 @@ const seedServices = async () => {
 
 // RUN THE SEED SCRIPT
 seedServices();
+
+const lockerLocations = [
+    {
+        name: "Taylor’s University",
+        latitude: 3.0698,
+        longitude: 101.5986,
+        isAvailable: true,
+        address: "1, Jln Taylors, 47500 Subang Jaya, Selangor",
+    },
+    {
+        name: "Sunway Geo Residences",
+        latitude: 3.0731,
+        longitude: 101.6077,
+        isAvailable: false,
+        address:
+            "Persiaran Tasik Timur, Sunway South Quay, Bandar Sunway, 47500 Subang Jaya, Selangor",
+    },
+    {
+        name: "Tropicana City Office Tower",
+        latitude: 3.1339,
+        longitude: 101.6381,
+        isAvailable: true,
+        address: "Ground Floor, Damansara Intan, 40150 Petaling Jaya, Selangor",
+    },
+    {
+        name: "Garden Plaza",
+        latitude: 2.9254,
+        longitude: 101.6597,
+        isAvailable: false,
+        address: "Persiaran Harmoni, Cyber 3, 62000 Cyberjaya, Selangor",
+    },
+];
