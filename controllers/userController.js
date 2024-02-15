@@ -39,9 +39,9 @@ exports.otpGenerate = async (req, res, next) => {
 
 exports.otpVerification = async (req, res, next) => {
     try {
-        const { otpRes } = req.body;
+        const { otpRes, fcmToken } = req.body;
         if (otpGenerated == otpRes) {
-            const {user, isNewUser} = await UserServices.validateUser(currentNum);
+            const {user, isNewUser} = await UserServices.validateUser(currentNum, fcmToken);
             let tokenData = { _id: user._id, phoneNumber: user.phoneNumber};
             const token = await UserServices.generateToken(tokenData, "secretKey")
             const status = isNewUser? "newUser" : "existingUser";
