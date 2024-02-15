@@ -96,3 +96,19 @@ exports.editUserProfilePic = async (req, res, next) => {
         next(error);
     }
 }
+
+exports.deleteFCMToken = async (req, res, next) => {
+    try {
+        const { userId, fcmToken } = req.body;
+        const user = await UserModel.findById(userId);
+            if (user) {
+                user.fcmTokens = user.fcmTokens.filter(t => t !== fcmToken);
+                await user.save();
+            } else {
+                console.error(`User not found with ID: ${userId}`);
+            }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
