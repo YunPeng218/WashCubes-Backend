@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 // DEFINE NOTIFICATION MODEL
 const notificationSchema = new mongoose.Schema({
-    notificationID: {
+    notificationId: {
         type: String,
         required: true,
         unique: true,
     },
     user: {
-        userID: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
