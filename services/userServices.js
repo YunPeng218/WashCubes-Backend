@@ -2,16 +2,20 @@ const UserModel = require('../models/user')
 const jwt = require('jsonwebtoken')
 
 class UserServices {
-    static async validateUser(phoneNumber) {
+    static async validateUser(phoneNumber, fcmToken) {
         try {
-            const existingUser = await UserModel.findOne({ phoneNumber });
-            if (existingUser) {
-                return {user: existingUser, isNewUser: false};
+            let user = await UserModel.findOne({ phoneNumber });
+            if (user) {
+                if (!user.fcmTokens.includes(fcmToken)) {
+                    user.fcmTokens.push(fcmToken);
+                    await user.save();
+                }
+                return { user, isNewUser: false };
             } else {
-                const createUser = new UserModel({ phoneNumber });
+                const createUser = new UserModel({ phoneNumber, fcmTokens: [fcmToken] });
                 await createUser.save();
                 const newUser = await UserModel.findOne({ phoneNumber });
-                return {user: newUser, isNewUser: true};
+                return { user: newUser, isNewUser: true };
             }
         } catch (error) {
             throw error;

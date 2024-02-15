@@ -16,7 +16,12 @@ const userSchema = new mongoose.Schema({
     profilePicURL: {
         type: String,
         default: 'https://res.cloudinary.com/ddweldfmx/image/upload/v1707480915/profilePic/zxltbifbulr4m45lbsqq.png'
-    }
+    },
+    fcmTokens: [
+        {
+            type: String,
+        }
+    ]
 });
 
 const UserModel = mongoose.model('user', userSchema);
