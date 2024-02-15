@@ -4,6 +4,7 @@ var fcm = require("fcm-notification");
 var serviceAccount = require("../config/notificationKey.json");
 const NotificationServices = require("../services/notificationServices");
 const NotificationModel = require("../models/notification");
+const UserModel = require("../models/user");
 const certPath = admin.credential.cert(serviceAccount);
 var FCM = new fcm(certPath);
 
@@ -15,10 +16,12 @@ const generateNotificationId = () => {
     return NotificationId;
 };
 
-exports.sendNotification = (req, res, next) => {
+exports.sendNotification = async (req, res, next) => {
     try {
         const { userId, orderStatus, orderId, orderLocation } = req.body;
-        let message = {
+        const user = await UserModel.findOne({ "_id": userId });
+        const notificationId = generateNotificationId();
+        const message = {
             notification: {
                 title: "Your Laundry is Ready for " + orderStatus + "!",
                 body: "Order #" + orderId + " is now ready for " + orderStatus + " at " + orderLocation + "!"
@@ -26,22 +29,29 @@ exports.sendNotification = (req, res, next) => {
             data: {
                 title: "Your Laundry is Ready for " + orderStatus + "!",
                 message: "Order #" + orderId + " is now ready for " + orderStatus + " at " + orderLocation + "!"
-            },
-            token: req.body.fcm_token,
-        };
-
-        FCM.send(message, function(err, resp) {
-            if (err) {
-                return res.status(500).send({
-                    message: err
-                });
-            } else {
-                const notificationId = generateNotificationId();
-                NotificationServices.saveNotification(notificationId, userId, message.data.title, message.data.message)
-                return res.status(200).send({
-                    message: "Notification Sent and Saved"
-                });
             }
+        };
+        await NotificationServices.saveNotification(notificationId, userId, message.data.title, message.data.message);
+        const notificationsPromises = user.fcmTokens.map(async (fcmToken) => {
+            message.token = fcmToken;
+            return new Promise((resolve, reject) => {
+                FCM.send(message, function(err, resp) {
+                    if (err) {
+                        if (err.code === 'messaging/registration-token-not-registered') {
+                            console.warn(`FCM Token ${fcmToken} is not registered. Removing from the user's tokens.`);
+                            resolve();
+                        } else {
+                            reject(err);
+                        }
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        });
+        await Promise.all(notificationsPromises);
+        return res.status(200).send({
+            message: "Notification Sent and Saved"
         });
     } catch (err) {
         throw err;

@@ -112,3 +112,24 @@ exports.deleteFCMToken = async (req, res, next) => {
         next(error);
     }
 }
+
+exports.addFCMToken = async (req, res, next) => {
+    try {
+        const { userId, fcmToken } = req.body;
+        const user = await UserModel.findById(userId);
+        if (user) {
+            if (!user.fcmTokens.includes(fcmToken)) {
+                user.fcmTokens.push(fcmToken);
+                await user.save();
+                console.log('FCM token added successfully')
+            } else {
+                console.log('FCM token already exists')
+            }
+        } else {
+            console.error(`User not found with ID: ${userId}`);
+        }
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+}
