@@ -25,7 +25,7 @@ exports.otpGenerate = async (req, res, next) => {
         otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
         client.messages
             .create({
-                body: otpGenerated + ' is your OTP code. The OTP code generated is valid for 1 minute.',
+                body: otpGenerated + ' is your OTP. The OTP generated is valid for 1 minute.',
                 from: 'whatsapp:+14155238886',
                 to: 'whatsapp:+' + currentNum
             });
