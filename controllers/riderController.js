@@ -2,10 +2,6 @@ const RiderServices = require('../services/riderServices');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator')
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 exports.register = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -73,8 +69,8 @@ exports.resetPassRequest = async (req, res, next) => {
             return;
         }
         otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-        res.status(200).json({ status: "Sent", otp: otpGenerated });
         sendOtpEmail(email, otpGenerated);
+        res.status(200).json({ status: "Sent", otp: otpGenerated });
     } catch (e) {
         next(e);
     }
