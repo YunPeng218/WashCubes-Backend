@@ -12,11 +12,11 @@ const riderSchema = new mongoose.Schema({
     email: {
         type: String,
         unique: true,
-        require: true
+        required: true
     },
     password: {
         type: String,
-        require: true
+        required: true
     },
     profilePicURL: {
         type: String,
@@ -30,14 +30,14 @@ const riderSchema = new mongoose.Schema({
 });
 
 // Used to encrypt riders' password
-riderSchema.pre("save",async function(){
+riderSchema.pre("save", async function () {
     var rider = this;
     if(!rider.isModified("password")){
         return
     }
     try{
         const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(rider.password,salt);
+        const hash = await bcrypt.hash(rider.password, salt);
         rider.password = hash;
     }catch(err){
         throw err;
@@ -55,8 +55,12 @@ riderSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 riderSchema.methods.updatePassword = async function(newPassword) {
-    this.password = await bcrypt.hash(newPassword, 10);
-    await this.save();
+    try {
+        this.password = newPassword;
+        await this.save();
+    } catch (error) {
+        throw error;
+    }
 };
 
 const RiderModel = mongoose.model('rider', riderSchema);

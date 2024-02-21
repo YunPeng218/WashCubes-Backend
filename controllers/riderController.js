@@ -2,8 +2,6 @@ const RiderServices = require('../services/riderServices');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator')
 
-let currentEmail, otpGenerated = null;
-
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -46,7 +44,7 @@ exports.login = async (req, res, next) => {
     }
 }
 
-async function sendOTP(otp) {
+async function sendOtpEmail(email, otp) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
@@ -60,7 +58,7 @@ async function sendOTP(otp) {
 
     const content = await transporter.sendMail({
         from: "washcubes@gmail.com",
-        to: currentEmail,
+        to: email,
         subject: "Reset Your Password",
         text: 'Your OTP for password reset is ' + otp + '. The OTP generated is valid for 5 minutes.'
     })
@@ -75,31 +73,17 @@ exports.resetPassRequest = async (req, res, next) => {
             return;
         }
         otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-        res.status(200).json({ status: "Sent" });
-        currentEmail == rider.email;
-        sendOTP(rider.email, otpGenerated);
+        res.status(200).json({ status: "Sent", otp: otpGenerated });
+        sendOtpEmail(email, otpGenerated);
     } catch (e) {
         next(e);
     }
 }
 
-exports.otpValidation = async (req, res, next) => {
+exports.changePassword = async (req, res, next) => {
     try {
-        const otpRes = req.body.otpRes;
-        if (otpGenerated == otpRes) {
-            res.status(200).json({ status: 'true' });
-        } else
-            res.status(500).json({ status : 'false'});
-    } catch (error) {
-        console.log("---> err -->", error);
-        next(error);
-    }
-}
-
-exports.resetPassword = async (req, res, next) => {
-    try {
-        const newPassword = req.body;
-        const success = await RiderServices.updateRiderPassword(riderEmail, newPassword);
+        const {email, newPassword} = req.body;
+        const success = await RiderServices.updateRiderPassword(email, newPassword);
         if (success) {
             res.status(200).json({ status: 'Success' });
         } else {

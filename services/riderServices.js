@@ -1,7 +1,7 @@
 const RiderModel = require("../models/rider");
 const jwt = require("jsonwebtoken");
+
 class RiderServices{
- 
     static async registerRider(email,password){
         try{
             const createRider = new RiderModel({email,password});
@@ -26,8 +26,9 @@ class RiderServices{
 
     static async updateRiderPassword(email, newPassword) {
         try {
-            const rider = await Rider.findOne({ email });
+            const rider = await RiderModel.findOne({ email });
             await rider.updatePassword(newPassword);
+            return { status: 'Password updated successfully' };
         } catch (error) {
             throw error;
         }
