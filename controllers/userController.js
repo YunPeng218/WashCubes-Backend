@@ -70,7 +70,6 @@ exports.editUserDetails = async (req, res, next) => {
 
 exports.editPhoneNumber = async (req, res, next) => {
     try {
-        console.log('hello');
         const { userId, phoneNumber } = req.body;
         const user = await UserModel.findById(userId);
         if (user) {
