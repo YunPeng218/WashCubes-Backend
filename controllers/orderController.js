@@ -9,7 +9,6 @@ module.exports.displayUserOrders = async (req, res) => {
     const userId = req.query.userId;
     const orders = await Order.find({
         'user.userId': userId,
-        orderStatus: { $ne: 'Completed' }
     });
     res.status(200).json({ orders });
 }
@@ -135,4 +134,16 @@ module.exports.confirmOrderDropOff = async (req, res) => {
     await order.save();
 
     res.status(200).json({ order });
+}
+
+module.exports.getOrdersReadyForPickup = async (req, res) => {
+    const { lockerSiteId } = req.query;
+    const orders = await Order.find({
+        'orderStage.dropOff.status': true,
+        'orderStage.collectedByRider.status': false,
+        'locker.lockerSiteId': lockerSiteId,
+    })
+    if (!orders) throw new Error('ERROR GETTING ORDERS READY FOR PICK UP');
+    console.log(orders);
+    res.status(200).json({ orders });
 }

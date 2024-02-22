@@ -32,14 +32,14 @@ const riderSchema = new mongoose.Schema({
 // Used to encrypt riders' password
 riderSchema.pre("save", async function () {
     var rider = this;
-    if(!rider.isModified("password")){
+    if (!rider.isModified("password")) {
         return
     }
-    try{
+    try {
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(rider.password, salt);
         rider.password = hash;
-    }catch(err){
+    } catch (err) {
         throw err;
     }
 });
@@ -54,7 +54,7 @@ riderSchema.methods.comparePassword = async function (candidatePassword) {
     }
 };
 
-riderSchema.methods.updatePassword = async function(newPassword) {
+riderSchema.methods.updatePassword = async function (newPassword) {
     try {
         this.password = newPassword;
         await this.save();

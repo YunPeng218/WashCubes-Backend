@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const ejsMate = require('ejs-mate');
 const body_parser = require('body-parser');
+const Order = require('./models/order');
 
 // IMPORT ENVIRONMENT VARIABLES
 require('dotenv').config();

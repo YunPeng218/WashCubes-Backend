@@ -15,4 +15,6 @@ router.post('/orders/cancel-order-creation', orderController.cancelOrderCreation
 
 router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
 
+router.get('/orders/ready-for-pickup', orderController.getOrdersReadyForPickup);
+
 module.exports = router;
