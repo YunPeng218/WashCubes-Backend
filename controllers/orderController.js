@@ -3,6 +3,7 @@ const Order = require('../models/order');
 const Service = require('../models/service');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
+const { createJob } = require('../controllers/jobController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayUserOrders = async (req, res) => {
@@ -141,9 +142,16 @@ module.exports.getOrdersReadyForPickup = async (req, res) => {
     const orders = await Order.find({
         'orderStage.dropOff.status': true,
         'orderStage.collectedByRider.status': false,
+        'selectedByRider': false,
         'locker.lockerSiteId': lockerSiteId,
     })
     if (!orders) throw new Error('ERROR GETTING ORDERS READY FOR PICK UP');
-    console.log(orders);
     res.status(200).json({ orders });
+}
+
+module.exports.confirmSelectedPickupOrders = async (req, res) => {
+    console.log(req.body);
+    const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
+    const newJobNumber = await createJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    res.status(200).json({ newJobNumber });
 }

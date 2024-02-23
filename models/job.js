@@ -13,25 +13,25 @@ const jobSchema = new mongoose.Schema({
         unique: true
     },
     rider: {
-        riderId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'rider',
-            required: true,
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'rider',
+        required: true,
     },
     jobType: {
         type: String,
         enum: jobTypeEnum,
         required: true,
     },
-    locker: {
-        lockerSiteId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'locker',
-            required: true,
-        },
+    lockerSite: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'locker',
+        required: true,
     },
     orders: [Order.schema],
+    isJobActive: {
+        type: Boolean,
+        default: true,
+    }
 });
 
 const Job = mongoose.model('Job', jobSchema);

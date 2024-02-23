@@ -17,4 +17,6 @@ router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
 
 router.get('/orders/ready-for-pickup', orderController.getOrdersReadyForPickup);
 
+router.post('/orders/ready-for-pickup', orderController.confirmSelectedPickupOrders);
+
 module.exports = router;

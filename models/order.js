@@ -153,6 +153,10 @@ const orderSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
+    },
+    selectedByRider: {
+        type: Boolean,
+        default: false,
     }
 });
 

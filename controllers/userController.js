@@ -30,10 +30,10 @@ exports.sendOTP = async (req, res, next) => {
 exports.userVerification = async (req, res, next) => {
     try {
         const { phoneNumber, fcmToken } = req.body;
-        const {user, isNewUser} = await UserServices.validateUser(phoneNumber, fcmToken);
-        let tokenData = { _id: user._id, phoneNumber: user.phoneNumber};
+        const { user, isNewUser } = await UserServices.validateUser(phoneNumber, fcmToken);
+        let tokenData = { _id: user._id, phoneNumber: user.phoneNumber };
         const token = await UserServices.generateToken(tokenData, "secretKey")
-        const status = isNewUser? "newUser" : "existingUser";
+        const status = isNewUser ? "newUser" : "existingUser";
         res.status(200).json({ status, token: token })
     } catch (error) {
         console.log("---> err -->", error);
@@ -102,12 +102,12 @@ exports.deleteFCMToken = async (req, res, next) => {
     try {
         const { userId, fcmToken } = req.body;
         const user = await UserModel.findById(userId);
-            if (user) {
-                user.fcmTokens = user.fcmTokens.filter(t => t !== fcmToken);
-                await user.save();
-            } else {
-                console.error(`User not found with ID: ${userId}`);
-            }
+        if (user) {
+            user.fcmTokens = user.fcmTokens.filter(t => t !== fcmToken);
+            await user.save();
+        } else {
+            console.error(`User not found with ID: ${userId}`);
+        }
     } catch (error) {
         console.error(error);
         next(error);
