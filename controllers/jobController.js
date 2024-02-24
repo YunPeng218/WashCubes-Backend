@@ -41,3 +41,32 @@ module.exports.getRiderActiveJob = async (req, res) => {
         res.status(200).json({ job, jobLocker });
     }
 }
+
+module.exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { jobNumber, nextOrderStage } = req.body;
+        const job = await Job.findOne({ 'jobNumber': jobNumber }).populate('orders');
+        // Update the status of next order stage to true
+        for (const order of job.orders) {
+            if (order.orderStage[nextOrderStage]) {
+                order.orderStage[nextOrderStage].status = true;
+                order.orderStage[nextOrderStage].dateUpdated = new Date();
+            }
+        }
+        for (const order of job.orders) {
+            await Order.findOneAndUpdate(
+                { _id: order._id },
+                {
+                    $set: {
+                        'orderStage': order.orderStage,
+                    },
+                }
+            );
+        }
+        await job.save();
+        res.status(200).json({ message: 'Order stages updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
