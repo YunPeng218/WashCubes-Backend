@@ -31,6 +31,12 @@ const jobSchema = new mongoose.Schema({
     isJobActive: {
         type: Boolean,
         default: true,
+    },
+    receiverName: {
+        type: String
+    },
+    receiverIC: {
+        type: String
     }
 });
 
