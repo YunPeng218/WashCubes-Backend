@@ -151,6 +151,9 @@ const orderSchema = new mongoose.Schema({
             }
         },
     },
+    barcodeID: {
+        type: String,
+    },
     createdAt: {
         type: Date,
     },

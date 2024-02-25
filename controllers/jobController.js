@@ -44,14 +44,25 @@ module.exports.getRiderActiveJob = async (req, res) => {
 
 module.exports.updateOrderStatus = async (req, res) => {
     try {
-        const { jobNumber, nextOrderStage } = req.body;
+        const { jobNumber, nextOrderStage, barcodeID, receiverName, receiverIC } = req.body;
         const job = await Job.findOne({ 'jobNumber': jobNumber }).populate('orders');
-        // Update the status of next order stage to true
-        for (const order of job.orders) {
+        let barcodeIDArray;
+        if (barcodeID != undefined) {
+            barcodeIDArray = JSON.parse(barcodeID);
+        }
+        for (let i = 0; i < job.orders.length; i++) {
+            const order = job.orders[i];
             if (order.orderStage[nextOrderStage]) {
                 order.orderStage[nextOrderStage].status = true;
                 order.orderStage[nextOrderStage].dateUpdated = new Date();
             }
+            if (barcodeIDArray)
+                order.barcodeID = barcodeIDArray[i];
+        }
+        if ((receiverName != undefined) && (receiverIC != undefined)) {
+            job.receiverName = receiverName;
+            job.receiverIC = receiverIC;
+            job.isJobActive = false;
         }
         for (const order of job.orders) {
             await Order.findOneAndUpdate(
@@ -59,6 +70,7 @@ module.exports.updateOrderStatus = async (req, res) => {
                 {
                     $set: {
                         'orderStage': order.orderStage,
+                        'barcodeID': order.barcodeID,
                     },
                 }
             );
