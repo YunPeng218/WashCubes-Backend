@@ -30,7 +30,6 @@ const statusEnum = ['Pending Drop Off',
 const orderSchema = new mongoose.Schema({
     orderNumber: {
         type: String,
-        unique: true
     },
     user: {
         userId: {
@@ -63,6 +62,15 @@ const orderSchema = new mongoose.Schema({
             ref: 'Locker',
             required: true,
         },
+        compartmentId: {
+            type: String,
+        },
+        compartmentNumber: {
+            type: String,
+        },
+        compartmentSize: {
+            type: String,
+        }
     },
     service: {
         type: mongoose.Schema.Types.ObjectId,

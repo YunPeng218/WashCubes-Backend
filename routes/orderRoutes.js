@@ -19,4 +19,8 @@ router.get('/orders/ready-for-pickup', orderController.getOrdersReadyForPickup);
 
 router.post('/orders/ready-for-pickup', orderController.confirmSelectedPickupOrders);
 
+router.get('/orders/ready-for-pickup/laundry-site', orderController.getLaundrySiteOrdersReadyForPickup);
+
+router.post('/orders/ready-for-pickup/laundry-site', orderController.confirmSelectedLaundrySitePickupOrders);
+
 module.exports = router;

@@ -2,11 +2,10 @@
 const Job = require('../models/job');
 const Order = require('../models/order');
 const Locker = require('../models/locker');
+const { getAvailableCompartment } = require('../controllers/lockerController');
 
-module.exports.createJob = async (orderIds, jobType, lockerSite, rider) => {
+module.exports.createLockerToLaundrySiteJob = async (orderIds, jobType, lockerSite, rider) => {
     const jobNumber = generateJobNumber();
-
-    console.log(orderIds);
     const job = new Job();
 
     job.lockerSite = lockerSite;
@@ -18,6 +17,41 @@ module.exports.createJob = async (orderIds, jobType, lockerSite, rider) => {
         const order = await Order.findById(id);
         if (!order) throw new Error('Order Not Found');
         order.selectedByRider = true;
+        await order.save();
+        job.orders.push(order);
+    }
+    console.log(job);
+    await job.save();
+    return job.jobNumber;
+};
+
+module.exports.createLaundrySiteToLockerJob = async (orderIds, lockerSite, rider) => {
+    const jobNumber = generateJobNumber();
+    const job = new Job();
+
+    job.lockerSite = lockerSite;
+    job.rider = rider;
+    job.jobNumber = jobNumber;
+    job.jobType = 'Laundry Site to Locker';
+
+    for (let id of orderIds) {
+        const order = await Order.findById(id);
+        if (!order) throw new Error('Order Not Found');
+        order.selectedByRider = true;
+
+        // GET COMPARTMENT SIZE USED DURING USER DROP OFF
+        const locker = await Locker.findById(order.locker.lockerSiteId);
+        if (!locker) throw new Error('Locker Not Found');
+        const compartment = locker.compartments.find(compartment => compartment._id.toString() === order.locker.compartmentId);
+        if (!compartment) throw new Error('Compartment Not Found');
+
+        // ALLOCATE A COMPARTMENT FOR THE ORDER
+        const allocatedCompartment = await getAvailableCompartment(lockerSite, compartment.size);
+        if (!allocatedCompartment) throw new Error('No suitable compartment found');
+
+        order.collectionSite.compartmentId = allocatedCompartment._id;
+        order.collectionSite.compartmentNumber = allocatedCompartment.compartmentNumber;
+        order.collectionSite.compartmentSize = allocatedCompartment.compartmentSize;
         await order.save();
         job.orders.push(order);
     }
@@ -63,6 +97,13 @@ module.exports.updateOrderStatus = async (req, res) => {
             job.receiverName = receiverName;
             job.receiverIC = receiverIC;
             job.isJobActive = false;
+
+            for (const order of job.orders) {
+                const foundOrder = await Order.findById(order._id);
+                if (!foundOrder) throw new Error('Order Not Found');
+                foundOrder.selectedByRider = false;
+                await foundOrder.save();
+            }
         }
         for (const order of job.orders) {
             await Order.findOneAndUpdate(
@@ -74,6 +115,15 @@ module.exports.updateOrderStatus = async (req, res) => {
                     },
                 }
             );
+
+            // FREE UP COMPARTMENT USED BY ORDER
+            const locker = await Locker.findById(order.locker.lockerSiteId);
+            if (!locker) throw new Error('Locker Not Found');
+
+            const compartment = locker.compartments.find(compartment => compartment._id.toString() === order.locker.compartmentId);
+            if (!compartment) throw new Error('Compartment Not Found');
+            compartment.isAvailable = true;
+            await locker.save();
         }
         await job.save();
         res.status(200).json({ message: 'Order stages updated successfully' });

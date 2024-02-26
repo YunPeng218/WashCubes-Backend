@@ -3,7 +3,7 @@ const Order = require('../models/order');
 const Service = require('../models/service');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
-const { createJob } = require('../controllers/jobController');
+const { createJob, createLockerToLaundrySiteJob, createLaundrySiteToLockerJob } = require('../controllers/jobController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayUserOrders = async (req, res) => {
@@ -152,6 +152,25 @@ module.exports.getOrdersReadyForPickup = async (req, res) => {
 module.exports.confirmSelectedPickupOrders = async (req, res) => {
     console.log(req.body);
     const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const newJobNumber = await createJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    const newJobNumber = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    res.status(200).json({ newJobNumber });
+}
+
+module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
+    const { lockerSiteId } = req.query;
+    const orders = await Order.find({
+        'orderStage.processingComplete.status': true,
+        'orderStage.outForDelivery.status': false,
+        'collectionSite.lockerSiteId': lockerSiteId,
+        'selectedByRider': false,
+    })
+    if (!orders) throw new Error('ERROR GETTING LAUNDRY SITE ORDERS READY FOR PICK UP');
+    res.status(200).json({ orders });
+}
+
+module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
+    console.log(req.body);
+    const { lockerSiteId, riderId, selectedOrderIds } = req.body;
+    const newJobNumber = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
     res.status(200).json({ newJobNumber });
 }
