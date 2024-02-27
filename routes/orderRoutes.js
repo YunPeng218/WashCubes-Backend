@@ -17,6 +17,8 @@ router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
 
 router.get('/orders/ready-for-pickup/all-sites', orderController.getNumberOfOrdersReadyForPickup);
 
+router.get('/orders/ready-for-dropoff/all-sites', orderController.getNumberOfOrdersReadyForDropoff);
+
 router.get('/orders/ready-for-pickup', orderController.getOrdersReadyForPickup);
 
 router.post('/orders/ready-for-pickup', orderController.confirmSelectedPickupOrders);
