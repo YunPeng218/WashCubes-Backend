@@ -32,6 +32,14 @@ const jobSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    pickedUpStatus: {
+        type: Boolean,
+        default: false,
+    },
+    dropOffStatus: {
+        type: Boolean,
+        default: false,
+    },
     receiverName: {
         type: String
     },

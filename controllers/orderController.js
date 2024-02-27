@@ -137,6 +137,26 @@ module.exports.confirmOrderDropOff = async (req, res) => {
     res.status(200).json({ order });
 }
 
+module.exports.getNumberOfOrdersReadyForPickup = async (req, res) => {
+    const lockers = await Locker.find({});
+    const map = new Map();
+
+    for (const locker of lockers) {
+        const orders = await Order.find({
+            'orderStage.dropOff.status': true,
+            'orderStage.collectedByRider.status': false,
+            'selectedByRider': false,
+            'locker.lockerSiteId': locker._id,
+        })
+        if (!orders) throw new Error('ERROR GETTING NUMBER OF ORDERS READY FOR PICK UP');
+        map.set(locker._id.toString(), orders.length);
+    }
+    console.log(map);
+    const mapArray = Array.from(map.entries());
+    console.log(`Sending map to client: ${JSON.stringify(mapArray)}`);
+    res.status(200).json({ mapArray });
+}
+
 module.exports.getOrdersReadyForPickup = async (req, res) => {
     const { lockerSiteId } = req.query;
     const orders = await Order.find({

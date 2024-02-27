@@ -78,8 +78,10 @@ module.exports.getRiderActiveJob = async (req, res) => {
 
 module.exports.updateOrderStatus = async (req, res) => {
     try {
-        const { jobNumber, nextOrderStage, barcodeID, receiverName, receiverIC, proofPicUrl} = req.body;
+        const { jobNumber, nextOrderStage, barcodeID, receiverName, receiverIC, proofPicUrl } = req.body;
         const job = await Job.findOne({ 'jobNumber': jobNumber }).populate('orders');
+        job.pickedUpStatus = true;
+
         let barcodeIDArray;
         let proofPicUrlArray;
         // Convert the barcodeID from string to array (will only be executed during locker pick up)
@@ -109,6 +111,7 @@ module.exports.updateOrderStatus = async (req, res) => {
             job.receiverName = receiverName;
             job.receiverIC = receiverIC;
             job.isJobActive = false;
+            job.dropOffStatus = true;
 
             for (const order of job.orders) {
                 const foundOrder = await Order.findById(order._id);
@@ -120,6 +123,7 @@ module.exports.updateOrderStatus = async (req, res) => {
         // Push proofPicUrl into each job (will only be executed during locker drop off)
         if (proofPicUrlArray) {
             job.isJobActive = false;
+            job.dropOffStatus = true;
 
             for (const order of job.orders) {
                 const foundOrder = await Order.findById(order._id);
