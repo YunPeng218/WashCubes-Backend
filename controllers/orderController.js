@@ -211,6 +211,8 @@ module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
 module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
     console.log(req.body);
     const { lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const newJobNumber = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
-    res.status(200).json({ newJobNumber });
+    const { jobNumber, unavailableOrders } = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
+    console.log(jobNumber);
+    console.log(`Sending array to client: ${JSON.stringify(unavailableOrders)}`);
+    res.status(200).json({ jobNumber, unavailableOrders });
 }

@@ -26,6 +26,7 @@ module.exports.createLockerToLaundrySiteJob = async (orderIds, jobType, lockerSi
 };
 
 module.exports.createLaundrySiteToLockerJob = async (orderIds, lockerSite, rider) => {
+    let unavailableOrders = [];
     const jobNumber = generateJobNumber();
     const job = new Job();
 
@@ -37,7 +38,6 @@ module.exports.createLaundrySiteToLockerJob = async (orderIds, lockerSite, rider
     for (let id of orderIds) {
         const order = await Order.findById(id);
         if (!order) throw new Error('Order Not Found');
-        order.selectedByRider = true;
 
         // GET COMPARTMENT SIZE USED DURING USER DROP OFF
         const locker = await Locker.findById(order.locker.lockerSiteId);
@@ -47,17 +47,21 @@ module.exports.createLaundrySiteToLockerJob = async (orderIds, lockerSite, rider
 
         // ALLOCATE A COMPARTMENT FOR THE ORDER
         const allocatedCompartment = await getAvailableCompartment(lockerSite, compartment.size);
-        if (!allocatedCompartment) throw new Error('No suitable compartment found');
-
-        order.collectionSite.compartmentId = allocatedCompartment._id;
-        order.collectionSite.compartmentNumber = allocatedCompartment.compartmentNumber;
-        order.collectionSite.compartmentSize = allocatedCompartment.compartmentSize;
-        await order.save();
-        job.orders.push(order);
+        if (!allocatedCompartment) {
+            unavailableOrders.push(order.orderNumber);
+        } else {
+            order.selectedByRider = true;
+            order.collectionSite.compartmentId = allocatedCompartment._id;
+            order.collectionSite.compartmentNumber = allocatedCompartment.compartmentNumber;
+            order.collectionSite.compartmentSize = allocatedCompartment.compartmentSize;
+            await order.save();
+            job.orders.push(order);
+        }
     }
+    if (job.orders.length === 0) return { jobNumber: 'Unavailable', unavailableOrders };
     console.log(job);
     await job.save();
-    return job.jobNumber;
+    return { jobNumber: job.jobNumber, unavailableOrders };
 };
 
 const generateJobNumber = () => {
