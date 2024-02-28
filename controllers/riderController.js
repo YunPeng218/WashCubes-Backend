@@ -1,6 +1,7 @@
 const RiderServices = require('../services/riderServices');
 const nodemailer = require('nodemailer');
-const otpGenerator = require('otp-generator')
+const otpGenerator = require('otp-generator');
+const RiderModel = require('../models/rider');
 
 exports.register = async (req, res, next) => {
     try {
@@ -86,6 +87,17 @@ exports.changePassword = async (req, res, next) => {
         }
     } catch (error) {
         console.log("---> err -->", error);
+        next(error);
+    }
+}
+
+exports.getRiderDetails = async (req, res, next) => {
+    try {
+        const riderId = req.query.riderId;
+        const rider = await RiderModel.findById(riderId);
+        if (rider) res.status(200).json({ rider });
+    } catch (error) {
+        console.error(error);
         next(error);
     }
 }

@@ -5,5 +5,6 @@ router.post("/registerRider",RiderController.register);
 router.post("/loginRider", RiderController.login);
 router.post("/resetPassRequest", RiderController.resetPassRequest);
 router.post("/changePass", RiderController.changePassword);
+router.get("/rider", RiderController.getRiderDetails);
 
 module.exports = router;
