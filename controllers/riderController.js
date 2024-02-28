@@ -42,18 +42,17 @@ exports.login = async (req, res, next) => {
 
 async function sendOtpEmail(email, otp) {
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 578,
+        host: 'smtp-mail.outlook.com',
+        port: 587,
         secure: false,
         auth: {
-            user: 'washcubes@gmail.com',
-            pass: 'jwusouylviqtluvu'
+            user: 'washcubes@hotmail.com',
+            pass: 'i3Cubes218'
         }
     })
 
     const content = await transporter.sendMail({
-        from: "washcubes@gmail.com",
+        from: "washcubes@hotmail.com",
         to: email,
         subject: "Reset Your Password",
         text: 'Your OTP for password reset is ' + otp + '. The OTP generated is valid for 5 minutes.'
@@ -90,4 +89,3 @@ exports.changePassword = async (req, res, next) => {
         next(error);
     }
 }
-
