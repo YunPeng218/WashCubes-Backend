@@ -23,7 +23,7 @@ const PORT = 3000;
 const app = express();
 
 // DATABASE CONNECTION
-mongoose.connect('mongodb+srv://ivantan:ivantan123@cluster0.isivwp4.mongodb.net/?retryWrites=true&w=majority');
+mongoose.connect(process.env.DB_CONNECT);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB Atlas connection error:'));
 db.on('open', () => {
