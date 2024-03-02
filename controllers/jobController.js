@@ -12,6 +12,7 @@ module.exports.createLockerToLaundrySiteJob = async (orderIds, jobType, lockerSi
     job.rider = rider;
     job.jobNumber = jobNumber;
     job.jobType = jobType;
+    job.createdAt = Date.now();
 
     for (let id of orderIds) {
         const order = await Order.findById(id);
@@ -34,6 +35,7 @@ module.exports.createLaundrySiteToLockerJob = async (orderIds, lockerSite, rider
     job.rider = rider;
     job.jobNumber = jobNumber;
     job.jobType = 'Laundry Site to Locker';
+    job.createdAt = Date.now();
 
     for (let id of orderIds) {
         const order = await Order.findById(id);
@@ -77,6 +79,21 @@ module.exports.getRiderActiveJob = async (req, res) => {
     if (job) {
         const jobLocker = await Locker.findById(job.lockerSite);
         res.status(200).json({ job, jobLocker });
+    }
+}
+
+module.exports.getRiderJobHistory = async (req, res) => {
+    const { riderId } = req.query;
+    const jobs = await Job.find({ 'rider': riderId });
+    if (jobs.length > 0) {
+        const jobsWithLockerDetails = [];
+        for (const job of jobs) {
+            const jobLocker = await Locker.findById(job.lockerSite);
+            jobsWithLockerDetails.push({ job, jobLocker });
+        }
+        res.status(200).json({ jobs: jobsWithLockerDetails });
+    } else {
+        res.status(404).json({ message: 'No jobs found.' });
     }
 }
 

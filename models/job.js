@@ -45,6 +45,9 @@ const jobSchema = new mongoose.Schema({
     },
     receiverIC: {
         type: String
+    },
+    createdAt: {
+        type: Date,
     }
 });
 
