@@ -3,6 +3,7 @@ const Job = require('../models/job');
 const Order = require('../models/order');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
+const { sendNotification } = require('./notificationController');
 
 module.exports.createLockerToLaundrySiteJob = async (orderIds, jobType, lockerSite, rider) => {
     const jobNumber = generateJobNumber();
@@ -120,6 +121,15 @@ module.exports.updateOrderStatus = async (req, res) => {
                 order.orderStage[nextOrderStage].status = true;
                 order.orderStage[nextOrderStage].dateUpdated = new Date();
             }
+            // Send push notification to users about their order status update
+            const userId = (order.user.userId).toString();
+            const orderNumber = (order.orderNumber).toString();
+            req.body = {
+                userId,
+                orderStatus: nextOrderStage,
+                orderId: orderNumber
+            };
+            sendNotification(req);
             // Push barcodeID into each order (will only be executed during locker pick up)
             if (barcodeIDArray)
                 order.barcodeID = barcodeIDArray[i];
