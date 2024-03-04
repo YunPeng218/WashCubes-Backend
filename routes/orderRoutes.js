@@ -15,6 +15,8 @@ router.post('/orders/cancel-order-creation', orderController.cancelOrderCreation
 
 router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
 
+router.post('/orders/confirm-collection', orderController.confirmOrderCollection);
+
 router.get('/orders/ready-for-pickup/all-sites', orderController.getNumberOfOrdersReadyForPickup);
 
 router.get('/orders/ready-for-dropoff/all-sites', orderController.getNumberOfOrdersReadyForDropoff);

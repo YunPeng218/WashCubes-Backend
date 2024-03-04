@@ -124,15 +124,36 @@ module.exports.cancelOrderCreation = async (req, res) => {
     res.status(200).json({ message: 'Order Cancelled' });
 }
 
-// USER CONFIRMS DROP OFF 
+// USER CONFIRMS ORDER DROP OFF 
 module.exports.confirmOrderDropOff = async (req, res) => {
     const { orderId, lockerSiteId, compartmentId } = req.body;
     const order = await Order.findById(orderId);
-    if (!order) throw new Error('CONFIRM DROP OFF ERROR');
+    if (!order) throw new Error('CONFIRM ORDER DROP OFF ERROR');
 
     order.orderStage.dropOff.status = true;
     order.orderStage.dropOff.dateUpdated = Date.now();
     await order.save();
+
+    res.status(200).json({ order });
+}
+
+// USER CONFIRMS ORDER COLLECTION
+module.exports.confirmOrderCollection = async (req, res) => {
+    const { orderId, lockerSiteId, compartmentId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('CONFIRM ORDER COLLECTION ERROR');
+
+    order.orderStage.completed.status = true;
+    order.orderStage.completed.dateUpdated = Date.now();
+    await order.save();
+
+    // FREE UP COMPARTMENT
+    const locker = await Locker.findById(lockerSiteId).exec();
+    let compartment = locker.compartments.find(compartment => compartment._id.toString() === compartmentId);
+    if (compartment) {
+        compartment.isAvailable = true;
+        await locker.save();
+    }
 
     res.status(200).json({ order });
 }
