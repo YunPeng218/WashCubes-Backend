@@ -85,6 +85,9 @@ const orderSchema = new mongoose.Schema({
         },
         min: 0,
     },
+    finalPrice: {
+        type: Number,
+    },
     orderStage: {
         dropOff: {
             status: {
@@ -111,6 +114,24 @@ const orderSchema = new mongoose.Schema({
             },
             dateUpdated: {
                 type: Date,
+            },
+            verified: {
+                status: {
+                    type: Boolean,
+                    default: false,
+                },
+                dateUpdated: {
+                    type: Date,
+                },
+            },
+            processing: {
+                status: {
+                    type: Boolean,
+                    default: false,
+                },
+                dateUpdated: {
+                    type: Date,
+                },
             }
         },
         processingComplete: {
@@ -158,6 +179,15 @@ const orderSchema = new mongoose.Schema({
                 type: Date,
             }
         },
+        orderErrorReturned: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        }
     },
     barcodeID: {
         type: String,

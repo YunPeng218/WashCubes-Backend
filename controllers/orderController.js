@@ -14,6 +14,18 @@ module.exports.displayUserOrders = async (req, res) => {
     res.status(200).json({ orders });
 }
 
+module.exports.displayOrdersForOperator = async (req, res) => {
+    const orders = await Order.find({
+        $or: [
+            { 'orderStage.inProgress.status': true },
+            { 'orderStage.readyForCollection.status': true },
+            { 'orderStage.orderError.status': true },
+        ]
+    });
+    console.log(orders[0].orderStage.inProgress);
+    res.status(200).json({ orders });
+}
+
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
     console.log('GET LOCKER COMPARTMENT');
@@ -236,4 +248,32 @@ module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
     console.log(jobNumber);
     console.log(`Sending array to client: ${JSON.stringify(unavailableOrders)}`);
     res.status(200).json({ jobNumber, unavailableOrders });
+}
+
+module.exports.operatorApproveOrderDetails = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR APPROVE ORDER DETAILS ERROR');
+
+    order.finalPrice = order.estimatedPrice;
+
+    order.orderStage.inProgress.verified.status = true;
+    order.orderStage.inProgress.processing.status = true;
+    order.orderStage.inProgress.verified.dateUpdated = Date.now();
+    order.orderStage.inProgress.processing.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
+module.exports.operatorConfirmProcessingComplete = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR CONFIRM PROCESSING COMPLETE ERROR');
+
+    order.orderStage.processingComplete.status = true;
+    order.orderStage.processingComplete.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
 }
