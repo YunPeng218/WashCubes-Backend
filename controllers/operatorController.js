@@ -1,17 +1,17 @@
-const RiderServices = require('../services/riderServices');
+const OperatorServices = require('../services/operatorServices');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
-const RiderModel = require('../models/rider');
+const OperatorModel = require('../models/operator');
 
 exports.register = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const duplicate = await RiderServices.checkRider(email);
+        const duplicate = await OperatorServices.checkOperator(email);
         if (duplicate) {
             throw new Error(`Email: ${email}, Already Registered`)
         } else {
-            const response = await RiderServices.registerRider(email, password);
-            res.status(200).json({ status: true, success: 'Rider registered successfully' });
+            await OperatorServices.registerOperator(email, password);
+            res.status(200).json({ status: true, success: 'Operator registered successfully' });
         }
     } catch (err) {
         console.log("---> err -->", err);
@@ -22,19 +22,19 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const rider = await RiderServices.checkRider(email);
-        if (!rider) {
+        const operator = await OperatorServices.checkOperator(email);
+        if (!operator) {
             res.status(500).json({ status: false });
             return;
         }
-        const isPasswordCorrect = await rider.comparePassword(password);
+        const isPasswordCorrect = await operator.comparePassword(password);
         if (!isPasswordCorrect) {
             res.status(500).json({ status: false });
             return;
         }
         // Creating Token
-        let tokenData = { _id: rider._id, email: rider.email };
-        const token = await RiderServices.generateAccessToken(tokenData,"secretKey")
+        let tokenData = { _id: operator._id, email: operator.email };
+        const token = await OperatorServices.generateAccessToken(tokenData,"secretKey")
         res.status(200).json({ status: true, token: token });
     } catch (error) {
         console.log(error, 'err---->');
@@ -64,8 +64,8 @@ async function sendOtpEmail(email, otp) {
 exports.resetPassRequest = async (req, res, next) => {
     try {
         const email = req.body.email;
-        const rider = await RiderServices.checkRider(email);
-        if (!rider) {
+        const operator = await OperatorServices.checkOperator(email);
+        if (!operator) {
             res.status(500).json({ status: "NotFound" });
             return;
         }
@@ -80,7 +80,7 @@ exports.resetPassRequest = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
     try {
         const {email, newPassword} = req.body;
-        const success = await RiderServices.updateRiderPassword(email, newPassword);
+        const success = await OperatorServices.updateOperatorPassword(email, newPassword);
         if (success) {
             res.status(200).json({ status: 'Success' });
         } else {
@@ -92,11 +92,11 @@ exports.changePassword = async (req, res, next) => {
     }
 }
 
-exports.getRiderDetails = async (req, res, next) => {
+exports.getOperatorDetails = async (req, res, next) => {
     try {
-        const riderId = req.query.riderId;
-        const rider = await RiderModel.findById(riderId);
-        if (rider) res.status(200).json({ rider });
+        const operatorId = req.query.operatorId;
+        const operator = await OperatorModel.findById(operatorId);
+        if (operator) res.status(200).json({ operator });
     } catch (error) {
         console.error(error);
         next(error);

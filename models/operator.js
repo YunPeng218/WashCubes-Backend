@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require("bcrypt");
 
 // DEFINE SERVICE MODEL
-const riderSchema = new mongoose.Schema({
+const operatorSchema = new mongoose.Schema({
     phoneNumber: {
         type: Number,
     },
@@ -12,11 +12,15 @@ const riderSchema = new mongoose.Schema({
     email: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
     password: {
         type: String,
         required: true
+    },
+    icNumber: {
+        type: String,
+        unique: true
     },
     profilePicURL: {
         type: String,
@@ -24,23 +28,23 @@ const riderSchema = new mongoose.Schema({
     }
 });
 
-// Used to encrypt riders' password
-riderSchema.pre("save", async function () {
-    var rider = this;
-    if (!rider.isModified("password")) {
+// Used to encrypt operators' password
+operatorSchema.pre("save", async function () {
+    var operator = this;
+    if (!operator.isModified("password")) {
         return
     }
     try {
         const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(rider.password, salt);
-        rider.password = hash;
+        const hash = await bcrypt.hash(operator.password, salt);
+        operator.password = hash;
     } catch (err) {
         throw err;
     }
 });
 
 // Used to decrypt password for login validation
-riderSchema.methods.comparePassword = async function (candidatePassword) {
+operatorSchema.methods.comparePassword = async function (candidatePassword) {
     try {
         const isMatch = await bcrypt.compare(candidatePassword, this.password);
         return isMatch;
@@ -49,7 +53,7 @@ riderSchema.methods.comparePassword = async function (candidatePassword) {
     }
 };
 
-riderSchema.methods.updatePassword = async function (newPassword) {
+operatorSchema.methods.updatePassword = async function (newPassword) {
     try {
         this.password = newPassword;
         await this.save();
@@ -58,7 +62,7 @@ riderSchema.methods.updatePassword = async function (newPassword) {
     }
 };
 
-const RiderModel = mongoose.model('rider', riderSchema);
+const OperatorModel = mongoose.model('operator', operatorSchema);
 
 // EXPORT SERVICE MODEL
-module.exports = RiderModel;
+module.exports = OperatorModel;

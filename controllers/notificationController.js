@@ -16,19 +16,35 @@ const generateNotificationId = () => {
     return NotificationId;
 };
 
+// Return readable order status
+function getProperStatus(orderStatus) {
+    switch (orderStatus) {
+        case "readyForCollection":
+            return 'Ready for Collection';
+        case "outForDelivery":
+            return 'Out for Delivery';
+        case "processingComplete":
+            return 'Processing Completed';
+        case "inProgress":
+            return 'in Progress';
+        case "collectedByRider":
+            return 'Collected by Rider';
+    }
+}
+
 exports.sendNotification = async (req, res, next) => {
     try {
-        const { userId, orderStatus, orderId, orderLocation } = req.body;
+        const { userId, orderStatus, orderId } = req.body;
         const user = await UserModel.findOne({ "_id": userId });
         const notificationId = generateNotificationId();
         const message = {
             notification: {
-                title: "Your Laundry is Ready for " + orderStatus + "!",
-                body: "Order #" + orderId + " is now ready for " + orderStatus + " at " + orderLocation + "!"
+                title: "Your Laundry is " + getProperStatus(orderStatus) + "!",
+                body: "Order #" + orderId + " is Now " + getProperStatus(orderStatus) + "!"
             },
             data: {
-                title: "Your Laundry is Ready for " + orderStatus + "!",
-                message: "Order #" + orderId + " is now ready for " + orderStatus + " at " + orderLocation + "!"
+                title: "Your Laundry is " + getProperStatus(orderStatus) + "!",
+                message: "Order #" + orderId + " is Now " + getProperStatus(orderStatus) + "!"
             }
         };
         await NotificationServices.saveNotification(notificationId, userId, message.data.title, message.data.message);
@@ -38,7 +54,7 @@ exports.sendNotification = async (req, res, next) => {
                 FCM.send(message, function(err, resp) {
                     if (err) {
                         if (err.code === 'messaging/registration-token-not-registered') {
-                            console.warn(`FCM Token ${fcmToken} is not registered. Removing from the user's tokens.`);
+                            console.warn(`FCM Token ${fcmToken} is not registered.`);
                             resolve();
                         } else {
                             reject(err);
@@ -50,9 +66,6 @@ exports.sendNotification = async (req, res, next) => {
             });
         });
         await Promise.all(notificationsPromises);
-        return res.status(200).send({
-            message: "Notification Sent and Saved"
-        });
     } catch (err) {
         throw err;
     }

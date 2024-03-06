@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const ejsMate = require('ejs-mate');
 const body_parser = require('body-parser');
+const Order = require('./models/order');
 
 // IMPORT ENVIRONMENT VARIABLES
 require('dotenv').config();
@@ -15,13 +16,15 @@ const lockerRoutes = require('./routes/lockerRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const riderRoutes = require('./routes/riderRoutes');
+const jobRoutes = require('./routes/jobRoutes');
+const operatorRoutes = require('./routes/operatorRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
 const app = express();
 
 // DATABASE CONNECTION
-mongoose.connect('mongodb+srv://ivantan:ivantan123@cluster0.isivwp4.mongodb.net/?retryWrites=true&w=majority');
+mongoose.connect(process.env.DB_CONNECT);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB Atlas connection error:'));
 db.on('open', () => {
@@ -50,6 +53,8 @@ app.use('/', lockerRoutes);
 app.use('/', notificationRoutes);
 app.use('/', feedbackRoutes);
 app.use('/', riderRoutes);
+app.use('/', jobRoutes);
+app.use('/', operatorRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {

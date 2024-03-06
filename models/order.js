@@ -30,7 +30,6 @@ const statusEnum = ['Pending Drop Off',
 const orderSchema = new mongoose.Schema({
     orderNumber: {
         type: String,
-        unique: true
     },
     user: {
         userId: {
@@ -63,6 +62,15 @@ const orderSchema = new mongoose.Schema({
             ref: 'Locker',
             required: true,
         },
+        compartmentId: {
+            type: String,
+        },
+        compartmentNumber: {
+            type: String,
+        },
+        compartmentSize: {
+            type: String,
+        }
     },
     service: {
         type: mongoose.Schema.Types.ObjectId,
@@ -76,6 +84,9 @@ const orderSchema = new mongoose.Schema({
             return this.orderItems.reduce((total, item) => total + item.quantity * item.price, 0);
         },
         min: 0,
+    },
+    finalPrice: {
+        type: Number,
     },
     orderStage: {
         dropOff: {
@@ -103,6 +114,24 @@ const orderSchema = new mongoose.Schema({
             },
             dateUpdated: {
                 type: Date,
+            },
+            verified: {
+                status: {
+                    type: Boolean,
+                    default: false,
+                },
+                dateUpdated: {
+                    type: Date,
+                },
+            },
+            processing: {
+                status: {
+                    type: Boolean,
+                    default: false,
+                },
+                dateUpdated: {
+                    type: Date,
+                },
             }
         },
         processingComplete: {
@@ -150,9 +179,28 @@ const orderSchema = new mongoose.Schema({
                 type: Date,
             }
         },
+        orderErrorReturned: {
+            status: {
+                type: Boolean,
+                default: false,
+            },
+            dateUpdated: {
+                type: Date,
+            }
+        }
+    },
+    barcodeID: {
+        type: String,
+    },
+    proofPicUrl: {
+        type: String,
     },
     createdAt: {
         type: Date,
+    },
+    selectedByRider: {
+        type: Boolean,
+        default: false,
     }
 });
 

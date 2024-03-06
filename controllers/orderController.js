@@ -3,14 +3,26 @@ const Order = require('../models/order');
 const Service = require('../models/service');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
+const { createJob, createLockerToLaundrySiteJob, createLaundrySiteToLockerJob } = require('../controllers/jobController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayUserOrders = async (req, res) => {
     const userId = req.query.userId;
     const orders = await Order.find({
         'user.userId': userId,
-        orderStatus: { $ne: 'Completed' }
     });
+    res.status(200).json({ orders });
+}
+
+module.exports.displayOrdersForOperator = async (req, res) => {
+    const orders = await Order.find({
+        $or: [
+            { 'orderStage.inProgress.status': true },
+            { 'orderStage.readyForCollection.status': true },
+            { 'orderStage.orderError.status': true },
+        ]
+    });
+    console.log(orders[0].orderStage.inProgress);
     res.status(200).json({ orders });
 }
 
@@ -124,15 +136,144 @@ module.exports.cancelOrderCreation = async (req, res) => {
     res.status(200).json({ message: 'Order Cancelled' });
 }
 
-// USER CONFIRMS DROP OFF 
+// USER CONFIRMS ORDER DROP OFF 
 module.exports.confirmOrderDropOff = async (req, res) => {
     const { orderId, lockerSiteId, compartmentId } = req.body;
     const order = await Order.findById(orderId);
-    if (!order) throw new Error('CONFIRM DROP OFF ERROR');
+    if (!order) throw new Error('CONFIRM ORDER DROP OFF ERROR');
 
     order.orderStage.dropOff.status = true;
     order.orderStage.dropOff.dateUpdated = Date.now();
     await order.save();
 
     res.status(200).json({ order });
+}
+
+// USER CONFIRMS ORDER COLLECTION
+module.exports.confirmOrderCollection = async (req, res) => {
+    const { orderId, lockerSiteId, compartmentId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('CONFIRM ORDER COLLECTION ERROR');
+
+    order.orderStage.completed.status = true;
+    order.orderStage.completed.dateUpdated = Date.now();
+    await order.save();
+
+    // FREE UP COMPARTMENT
+    const locker = await Locker.findById(lockerSiteId).exec();
+    let compartment = locker.compartments.find(compartment => compartment._id.toString() === compartmentId);
+    if (compartment) {
+        compartment.isAvailable = true;
+        await locker.save();
+    }
+
+    res.status(200).json({ order });
+}
+
+module.exports.getNumberOfOrdersReadyForPickup = async (req, res) => {
+    const lockers = await Locker.find({});
+    const map = new Map();
+
+    for (const locker of lockers) {
+        const orders = await Order.find({
+            'orderStage.dropOff.status': true,
+            'orderStage.collectedByRider.status': false,
+            'selectedByRider': false,
+            'locker.lockerSiteId': locker._id,
+        })
+        if (!orders) throw new Error('ERROR GETTING NUMBER OF ORDERS READY FOR PICK UP');
+        map.set(locker._id.toString(), orders.length);
+    }
+    console.log(map);
+    const mapArray = Array.from(map.entries());
+    console.log(`Sending map to client: ${JSON.stringify(mapArray)}`);
+    res.status(200).json({ mapArray });
+}
+
+module.exports.getNumberOfOrdersReadyForDropoff = async (req, res) => {
+    const lockers = await Locker.find({});
+    const map = new Map();
+
+    for (const locker of lockers) {
+        const orders = await Order.find({
+            'orderStage.processingComplete.status': true,
+            'orderStage.outForDelivery.status': false,
+            'selectedByRider': false,
+            'collectionSite.lockerSiteId': locker._id,
+        })
+        if (!orders) throw new Error('ERROR GETTING NUMBER OF ORDERS READY FOR PICK UP');
+        map.set(locker._id.toString(), orders.length);
+    }
+    console.log(map);
+    const mapArray = Array.from(map.entries());
+    console.log(`Sending map to client: ${JSON.stringify(mapArray)}`);
+    res.status(200).json({ mapArray });
+}
+
+module.exports.getOrdersReadyForPickup = async (req, res) => {
+    const { lockerSiteId } = req.query;
+    const orders = await Order.find({
+        'orderStage.dropOff.status': true,
+        'orderStage.collectedByRider.status': false,
+        'selectedByRider': false,
+        'locker.lockerSiteId': lockerSiteId,
+    })
+    if (!orders) throw new Error('ERROR GETTING ORDERS READY FOR PICK UP');
+    res.status(200).json({ orders });
+}
+
+module.exports.confirmSelectedPickupOrders = async (req, res) => {
+    console.log(req.body);
+    const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
+    const newJobNumber = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    res.status(200).json({ newJobNumber });
+}
+
+module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
+    const { lockerSiteId } = req.query;
+    const orders = await Order.find({
+        'orderStage.processingComplete.status': true,
+        'orderStage.outForDelivery.status': false,
+        'collectionSite.lockerSiteId': lockerSiteId,
+        'selectedByRider': false,
+    })
+    if (!orders) throw new Error('ERROR GETTING LAUNDRY SITE ORDERS READY FOR PICK UP');
+    res.status(200).json({ orders });
+}
+
+module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
+    console.log(req.body);
+    const { lockerSiteId, riderId, selectedOrderIds } = req.body;
+    const { jobNumber, unavailableOrders } = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
+    console.log(jobNumber);
+    console.log(`Sending array to client: ${JSON.stringify(unavailableOrders)}`);
+    res.status(200).json({ jobNumber, unavailableOrders });
+}
+
+module.exports.operatorApproveOrderDetails = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR APPROVE ORDER DETAILS ERROR');
+
+    order.finalPrice = order.estimatedPrice;
+
+    order.orderStage.inProgress.verified.status = true;
+    order.orderStage.inProgress.processing.status = true;
+    order.orderStage.inProgress.verified.dateUpdated = Date.now();
+    order.orderStage.inProgress.processing.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
+module.exports.operatorConfirmProcessingComplete = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR CONFIRM PROCESSING COMPLETE ERROR');
+
+    order.orderStage.processingComplete.status = true;
+    order.orderStage.processingComplete.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
 }
