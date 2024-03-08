@@ -177,6 +177,15 @@ const orderSchema = new mongoose.Schema({
             },
             dateUpdated: {
                 type: Date,
+            },
+            proofPicUrl: [
+                {
+                    type: String,
+                }
+            ],
+            isRejected: {
+                type: Boolean,
+                default: false
             }
         },
         orderErrorReturned: {
