@@ -24,5 +24,6 @@ router.post('/orders/ready-for-pickup/laundry-site', orderController.confirmSele
 router.get('/orders/operator', orderController.displayOrdersForOperator);
 router.post('/orders/operator/approve-order-details', orderController.operatorApproveOrderDetails);
 router.post('/orders/operator/confirm-processing-complete', orderController.operatorConfirmProcessingComplete);
+router.patch('/orders/operator/edit-order-details', orderController.operatorEditOrderDetails);
 
 module.exports = router;

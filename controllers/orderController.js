@@ -266,6 +266,19 @@ module.exports.operatorApproveOrderDetails = async (req, res) => {
     res.status(200).json({});
 }
 
+module.exports.operatorEditOrderDetails = async (req, res) => {
+    const { orderId, orderItems } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR EDIT ORDER DETAILS ERROR');
+
+    order.orderItems = orderItems;
+    order.orderStage.orderError.status = true;
+    order.orderStage.orderError.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
 module.exports.operatorConfirmProcessingComplete = async (req, res) => {
     const { orderId } = req.body;
     const order = await Order.findById(orderId);
