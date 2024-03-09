@@ -183,20 +183,11 @@ const orderSchema = new mongoose.Schema({
                     type: String,
                 }
             ],
-            isRejected: {
+            userRejected: {
                 type: Boolean,
                 default: false
             }
         },
-        orderErrorReturned: {
-            status: {
-                type: Boolean,
-                default: false,
-            },
-            dateUpdated: {
-                type: Date,
-            }
-        }
     },
     barcodeID: {
         type: String,
