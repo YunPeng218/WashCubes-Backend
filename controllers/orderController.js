@@ -267,12 +267,13 @@ module.exports.operatorApproveOrderDetails = async (req, res) => {
 }
 
 module.exports.operatorEditOrderDetails = async (req, res) => {
-    const { orderId, orderItems, proofPicUrl } = req.body;
+    const { orderId, orderItems, proofPicUrl, finalPrice } = req.body;
     proofPicUrlArray = JSON.parse(proofPicUrl);
     const order = await Order.findById(orderId);
     if (!order) throw new Error('OPERATOR EDIT ORDER DETAILS ERROR');
 
     order.orderItems = orderItems;
+    order.finalPrice = parseFloat(finalPrice);
     order.orderStage.orderError.status = true;
     order.orderStage.orderError.dateUpdated = Date.now();
     for (let i = 0; i < proofPicUrlArray.length; i++) {
