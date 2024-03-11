@@ -203,3 +203,18 @@ module.exports.updateOrderStatus = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+module.exports.getReceiverDetailsByOrder = async (req, res) => {
+    try {
+        const { orderId } = req.query;
+        console.log(orderId);
+        const job = await Job.findOne({ 'orders._id': orderId, 'jobType': 'Locker To Laundry Site' }).exec();
+        if (!job) {
+            throw new Error('Job Not Found');
+        }
+        res.status(200).json({ receiverName: job.receiverName, receiverIC: job.receiverIC });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}

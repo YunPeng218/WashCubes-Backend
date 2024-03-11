@@ -8,4 +8,6 @@ router.get('/jobsHistory', jobController.getRiderJobHistory);
 
 router.post('/jobs/update-status', jobController.updateOrderStatus)
 
+router.get('/jobs/receiver-details', jobController.getReceiverDetailsByOrder)
+
 module.exports = router;
