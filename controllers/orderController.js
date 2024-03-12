@@ -289,6 +289,19 @@ module.exports.operatorConfirmProcessingComplete = async (req, res) => {
     res.status(200).json({});
 }
 
+module.exports.operatorApproveOrderReturn = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR APPROVE ORDER RETURN ERROR');
+
+    order.orderStage.orderError.returnProcessed = true;
+    order.orderStage.processingComplete.status = true;
+    order.orderStage.processingComplete.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
 module.exports.userResolveOrderError = async (req, res) => {
     const { orderId } = req.body;
     const order = await Order.findById(orderId);
