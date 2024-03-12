@@ -11,6 +11,8 @@ router.post('/orders/confirm-order', orderController.confirmOrder);
 router.post('/orders/cancel-order-creation', orderController.cancelOrderCreation);
 router.post('/orders/confirm-drop-off', orderController.confirmOrderDropOff);
 router.post('/orders/confirm-collection', orderController.confirmOrderCollection);
+router.post('/orders/order-error/resolve', orderController.userResolveOrderError);
+router.post('/orders/order-error/return', orderController.userRejectOrderError);
 
 // RIDER ORDER ROUTES
 router.get('/orders/ready-for-pickup/all-sites', orderController.getNumberOfOrdersReadyForPickup);

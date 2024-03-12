@@ -11,10 +11,7 @@ module.exports.getLockers = async (req, res) => {
 
 // GET DROP-OFF AND COLLECTION SITE
 module.exports.getDropAndCollectionSite = async (req, res) => {
-    console.log('GET DROP OFF AND COLLECTION SITE');
     const { dropOffSiteId, collectionSiteId } = req.query;
-    console.log(dropOffSiteId);
-    console.log(collectionSiteId);
 
     const dropOffLocker = await Locker.findById(dropOffSiteId);
     const collectionLocker = await Locker.findById(collectionSiteId);

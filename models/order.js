@@ -78,6 +78,7 @@ const orderSchema = new mongoose.Schema({
         required: true,
     },
     orderItems: [orderItemSchema],
+    oldOrderItems: [orderItemSchema],
     estimatedPrice: {
         type: Number,
         default: function () {
@@ -116,22 +117,12 @@ const orderSchema = new mongoose.Schema({
                 type: Date,
             },
             verified: {
-                status: {
-                    type: Boolean,
-                    default: false,
-                },
-                dateUpdated: {
-                    type: Date,
-                },
+                type: Boolean,
+                default: false,
             },
             processing: {
-                status: {
-                    type: Boolean,
-                    default: false,
-                },
-                dateUpdated: {
-                    type: Date,
-                },
+                type: Boolean,
+                default: false,
             }
         },
         processingComplete: {
@@ -184,6 +175,14 @@ const orderSchema = new mongoose.Schema({
                 }
             ],
             userRejected: {
+                type: Boolean,
+                default: false
+            },
+            userAccepted: {
+                type: Boolean,
+                default: false
+            },
+            returnProcessed: {
                 type: Boolean,
                 default: false
             }
