@@ -22,16 +22,13 @@ module.exports.displayOrdersForOperator = async (req, res) => {
             { 'orderStage.orderError.status': true },
         ]
     });
-    console.log(orders[0].orderStage.inProgress);
     res.status(200).json({ orders });
 }
 
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
-    console.log('GET LOCKER COMPARTMENT');
     const { selectedLockerSiteId, selectedSize } = req.body;
     const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
-    console.log(allocatedCompartment)
     if (allocatedCompartment) {
         res.status(200).json({ allocatedCompartment });
     } else {
@@ -46,7 +43,6 @@ module.exports.createOrder = async (req, res) => {
         const newOrderNumber = generateOrderNumber();
         const order = await createOrderObject(orderData, newOrderNumber);
         const newOrder = new Order(order);
-        console.log('SUCCESS', newOrder);
         res.status(200).json({ newOrder });
     } catch (error) {
         console.error('Error creating order:', error);
@@ -108,14 +104,12 @@ const findItemById = async (serviceId, itemId) => {
 // SAVE ORDER TO DATABASE AFTER USER CONFIRMATION
 module.exports.confirmOrder = async (req, res) => {
     try {
-        console.log('SAVE ORDER');
         const order = req.body;
         const existingOrder = await Order.findOne({ orderNumber: order.orderNumber });
         if (existingOrder) {
             return res.status(500).json({ message: 'Order with same order number exists.' });
         }
         const newOrder = new Order(order);
-        console.log(newOrder);
         newOrder.createdAt = Date.now();
         await newOrder.save();
         res.status(200).json({ newOrder });
@@ -184,9 +178,7 @@ module.exports.getNumberOfOrdersReadyForPickup = async (req, res) => {
         if (!orders) throw new Error('ERROR GETTING NUMBER OF ORDERS READY FOR PICK UP');
         map.set(locker._id.toString(), orders.length);
     }
-    console.log(map);
     const mapArray = Array.from(map.entries());
-    console.log(`Sending map to client: ${JSON.stringify(mapArray)}`);
     res.status(200).json({ mapArray });
 }
 
@@ -204,9 +196,7 @@ module.exports.getNumberOfOrdersReadyForDropoff = async (req, res) => {
         if (!orders) throw new Error('ERROR GETTING NUMBER OF ORDERS READY FOR PICK UP');
         map.set(locker._id.toString(), orders.length);
     }
-    console.log(map);
     const mapArray = Array.from(map.entries());
-    console.log(`Sending map to client: ${JSON.stringify(mapArray)}`);
     res.status(200).json({ mapArray });
 }
 
@@ -223,7 +213,6 @@ module.exports.getOrdersReadyForPickup = async (req, res) => {
 }
 
 module.exports.confirmSelectedPickupOrders = async (req, res) => {
-    console.log(req.body);
     const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
     const newJobNumber = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
     res.status(200).json({ newJobNumber });
@@ -242,11 +231,8 @@ module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
 }
 
 module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
-    console.log(req.body);
     const { lockerSiteId, riderId, selectedOrderIds } = req.body;
     const { jobNumber, unavailableOrders } = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
-    console.log(jobNumber);
-    console.log(`Sending array to client: ${JSON.stringify(unavailableOrders)}`);
     res.status(200).json({ jobNumber, unavailableOrders });
 }
 
@@ -257,10 +243,35 @@ module.exports.operatorApproveOrderDetails = async (req, res) => {
 
     order.finalPrice = order.estimatedPrice;
 
-    order.orderStage.inProgress.verified.status = true;
-    order.orderStage.inProgress.processing.status = true;
-    order.orderStage.inProgress.verified.dateUpdated = Date.now();
-    order.orderStage.inProgress.processing.dateUpdated = Date.now();
+    order.orderStage.inProgress.verified = true;
+    order.orderStage.inProgress.processing = true;
+    order.orderStage.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
+module.exports.operatorEditOrderDetails = async (req, res) => {
+    const { orderId, orderItems, proofPicUrl, finalPrice } = req.body;
+    proofPicUrlArray = JSON.parse(proofPicUrl);
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR EDIT ORDER DETAILS ERROR');
+
+    order.oldOrderItems = order.orderItems;
+
+    order.orderItems = orderItems;
+    order.finalPrice = parseFloat(finalPrice);
+
+    order.orderStage.inProgress.verified = true;
+    order.orderStage.inProgress.dateUpdated = Date.now();
+
+    order.orderStage.orderError.status = true;
+    order.orderStage.orderError.dateUpdated = Date.now();
+
+    for (let i = 0; i < proofPicUrlArray.length; i++) {
+        order.orderStage.orderError.proofPicUrl.push(proofPicUrlArray[i]);
+    }
+
     await order.save();
 
     res.status(200).json({});
@@ -273,6 +284,34 @@ module.exports.operatorConfirmProcessingComplete = async (req, res) => {
 
     order.orderStage.processingComplete.status = true;
     order.orderStage.processingComplete.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
+module.exports.userResolveOrderError = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('USER RESOLVE ORDER ERROR ERROR');
+
+    order.orderStage.orderError.status = false;
+    order.orderStage.orderError.userAccepted = true;
+    order.orderStage.orderError.dateUpdated = Date.now();
+    order.orderStage.inProgress.processing = true;
+    order.orderStage.inProgress.dateUpdated = Date.now();
+    await order.save();
+    //console.log(order);
+
+    res.status(200).json({});
+}
+
+module.exports.userRejectOrderError = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('USER REJECT ORDER ERROR ERROR');
+
+    order.orderStage.orderError.userRejected = true;
+    order.orderStage.orderError.dateUpdated = Date.now();
     await order.save();
 
     res.status(200).json({});
