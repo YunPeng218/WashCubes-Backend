@@ -1,17 +1,17 @@
-const OperatorServices = require('../services/operatorServices');
+const AdminServices = require('../services/adminServices');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
-const OperatorModel = require('../models/operator');
+const AdminModel = require('../models/admin');
 
 exports.register = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const duplicate = await OperatorServices.checkOperator(email);
+        const duplicate = await AdminServices.checkAdmin(email);
         if (duplicate) {
             throw new Error(`Email: ${email}, Already Registered`)
         } else {
-            await OperatorServices.registerOperator(email, password);
-            res.status(200).json({ status: true, success: 'Operator registered successfully' });
+            await AdminServices.registerAdmin(email, password);
+            res.status(200).json({ status: true, success: 'Admin registered successfully' });
         }
     } catch (err) {
         console.log("---> err -->", err);
@@ -22,12 +22,12 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const operator = await OperatorServices.checkOperator(email);
-        if (!operator) {
+        const admin = await AdminServices.checkAdmin(email);
+        if (!admin) {
             res.status(500).json({ status: false });
             return;
         }
-        const isPasswordCorrect = await operator.comparePassword(password);
+        const isPasswordCorrect = await admin.comparePassword(password);
         if (!isPasswordCorrect) {
             res.status(500).json({ status: false });
             return;
@@ -61,8 +61,8 @@ async function sendOtpEmail(email, otp) {
 exports.resetPassRequest = async (req, res, next) => {
     try {
         const email = req.body.email;
-        const operator = await OperatorServices.checkOperator(email);
-        if (!operator) {
+        const admin = await AdminServices.checkAdmin(email);
+        if (!admin) {
             res.status(500).json({ status: "NotFound" });
             return;
         }
@@ -77,7 +77,7 @@ exports.resetPassRequest = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
     try {
         const {email, newPassword} = req.body;
-        const success = await OperatorServices.updateOperatorPassword(email, newPassword);
+        const success = await AdminServices.updateAdminPassword(email, newPassword);
         if (success) {
             res.status(200).json({ status: 'Success' });
         } else {
@@ -89,11 +89,11 @@ exports.changePassword = async (req, res, next) => {
     }
 }
 
-exports.getOperatorDetails = async (req, res, next) => {
+exports.getAdminDetails = async (req, res, next) => {
     try {
-        const operatorId = req.query.operatorId;
-        const operator = await OperatorModel.findById(operatorId);
-        if (operator) res.status(200).json({ operator });
+        const adminId = req.query.adminId;
+        const admin = await AdminModel.findById(adminId);
+        if (admin) res.status(200).json({ admin });
     } catch (error) {
         console.error(error);
         next(error);
