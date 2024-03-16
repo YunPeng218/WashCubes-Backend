@@ -2,19 +2,23 @@ const OperatorModel = require("../models/operator");
 const jwt = require('jsonwebtoken')
 
 class OperatorServices{
-    static async registerOperator(email, password, icNumber, phoneNumber, name){
+    static async registerOperator(email, password, phoneNumber, icNumber, name, profilePicURL){
         try{
-            const newOperator = new OperatorModel({ email, password, icNumber, phoneNumber, name });
+            const newOperator = new OperatorModel({ email, password, phoneNumber, icNumber, name, profilePicURL });
             return await newOperator.save();
         }catch(err){
             throw err;
         }
     }
 
-    static async checkOperator(email){
+    static async checkOperator(email, phoneNumber, icNumber){
         try {
-            let operator = await OperatorModel.findOne({ email });
-            return operator;
+            let operatorWithEmail = await OperatorModel.findOne({ email });
+            let operatorWithPhoneNumber = await OperatorModel.findOne({ phoneNumber });
+            let operatorWithicNumber = await OperatorModel.findOne({ icNumber })
+            if (operatorWithEmail || operatorWithPhoneNumber || operatorWithicNumber) {
+                return true
+            }
         } catch (error) {
             throw error;
         }

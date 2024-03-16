@@ -7,6 +7,6 @@ router.post("/resetPassRequest", RiderController.resetPassRequest);
 router.post("/changePass", RiderController.changePassword);
 router.get("/rider", RiderController.getRiderDetails);
 router.get("/admin/fetchRiders", RiderController.displayAllRidersForAdmin);
-router.delete('/deleteAccount', RiderController.deleteRiderAccount);
+router.delete('/deleteRiderAccount', RiderController.deleteRiderAccount);
 
 module.exports = router;

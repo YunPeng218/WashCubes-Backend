@@ -10,7 +10,7 @@ exports.register = async (req, res, next) => {
         if (duplicate == true) {
             throw new Error(`Email: ${email} or Phone Number: ${phoneNumber} Already Registered`)
         } else {
-            const response = await RiderServices.registerRider(email, password, phoneNumber, name, profilePicURL);
+            await RiderServices.registerRider(email, password, phoneNumber, name, profilePicURL);
             res.status(200).json({ status: true, success: 'Rider registered successfully' });
         }
     } catch (err) {
@@ -103,7 +103,7 @@ exports.getRiderDetails = async (req, res, next) => {
     }
 }
 
-module.exports.displayAllRidersForAdmin = async (req, res) => {
+exports.displayAllRidersForAdmin = async (req, res) => {
     try {
         const riders = await RiderModel.find({});
         res.status(200).json({ riders });

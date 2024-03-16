@@ -5,12 +5,12 @@ const OperatorModel = require('../models/operator');
 
 exports.register = async (req, res, next) => {
     try {
-        const { email, password, icNumber, phoneNumber, name  } = req.body;
-        const duplicate = await OperatorServices.checkOperator(email);
-        if (duplicate) {
-            throw new Error(`Email: ${email}, Already Registered`)
+        const { email, password, icNumber, phoneNumber, name, profilePicURL } = req.body;
+        const duplicate = await OperatorServices.checkOperator(email, phoneNumber, icNumber);
+        if (duplicate == true) {
+            throw new Error(`Email: ${email} or Phone Number: ${phoneNumber} or IC Number: ${icNumber} Already Registered`)
         } else {
-            await OperatorServices.registerOperator(email, password, icNumber, phoneNumber, name );
+            await OperatorServices.registerOperator(email, password, phoneNumber, icNumber, name, profilePicURL);
             res.status(200).json({ status: true, success: 'Operator registered successfully' });
         }
     } catch (err) {
@@ -65,5 +65,30 @@ exports.getOperatorDetails = async (req, res, next) => {
     } catch (error) {
         console.error(error);
         next(error);
+    }
+}
+
+exports.displayAllOperatorsForAdmin = async (req, res) => {
+    try {
+        const operators = await OperatorModel.find({});
+        res.status(200).json({ operators });
+    } catch (error) {
+        console.error('Error retrieving operators:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+exports.deleteOperatorAccount = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const deletedOperator = await OperatorModel.findOneAndDelete({ email: email });
+        if (deletedOperator) {
+            res.status(200).json({ status: 'Success', message: 'Operator account deleted successfully' });
+        } else {
+            res.status(404).json({ status: 'Not Found', message: 'Operator not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting operator account:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }

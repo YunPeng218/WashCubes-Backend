@@ -2,7 +2,7 @@ const RiderModel = require("../models/rider");
 const jwt = require("jsonwebtoken");
 
 class RiderServices{
-    static async registerRider( email, password, phoneNumber, name, profilePicURL ){
+    static async registerRider(email, password, phoneNumber, name, profilePicURL){
         try{
             const createRider = new RiderModel({ email, password, phoneNumber, name, profilePicURL});
             return await createRider.save();
