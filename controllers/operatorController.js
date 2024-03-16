@@ -44,8 +44,8 @@ exports.login = async (req, res, next) => {
 
 exports.changePassword = async (req, res, next) => {
     try {
-        const {email, newPassword} = req.body;
-        const success = await OperatorServices.updateOperatorPassword(email, newPassword);
+        const {email, oldPassword, newPassword} = req.body;
+        const success = await OperatorServices.updateOperatorPassword(email, oldPassword, newPassword);
         if (success) {
             res.status(200).json({ status: 'Success' });
         } else {

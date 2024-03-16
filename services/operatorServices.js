@@ -24,11 +24,14 @@ class OperatorServices{
         return jwt.sign(tokenData, secretKey);
     }
 
-    static async updateOperatorPassword(email, newPassword) {
+    static async updateOperatorPassword(email, oldPassword, newPassword) {
         try {
             const operator = await OpertorModel.findOne({ email });
-            await operator.updatePassword(newPassword);
-            return { status: 'Password updated successfully' };
+            const isPasswordCorrect = await operator.comparePassword(oldPassword);
+            if (isPasswordCorrect) {
+                await operator.updatePassword(newPassword);
+                return { status: 'Password updated successfully' };
+            }
         } catch (error) {
             throw error;
         }
