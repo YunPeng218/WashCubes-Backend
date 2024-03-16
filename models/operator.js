@@ -5,9 +5,11 @@ const bcrypt = require("bcrypt");
 const operatorSchema = new mongoose.Schema({
     phoneNumber: {
         type: Number,
+        required: true
     },
     name: {
         type: String,
+        required: true
     },
     email: {
         type: String,
@@ -20,7 +22,8 @@ const operatorSchema = new mongoose.Schema({
     },
     icNumber: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     profilePicURL: {
         type: String,

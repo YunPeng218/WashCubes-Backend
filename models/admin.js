@@ -5,14 +5,16 @@ const bcrypt = require("bcrypt");
 const adminSchema = new mongoose.Schema({
     phoneNumber: {
         type: Number,
+        required: true
     },
     name: {
         type: String,
+        required: true
     },
     email: {
         type: String,
         unique: true,
-        required: true,
+        required: true
     },
     password: {
         type: String,
@@ -20,7 +22,8 @@ const adminSchema = new mongoose.Schema({
     },
     icNumber: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     profilePicURL: {
         type: String,

@@ -1,9 +1,10 @@
 const OperatorModel = require("../models/operator");
+const jwt = require('jsonwebtoken')
 
 class OperatorServices{
-    static async registerOperator(email, password){
+    static async registerOperator(email, password, icNumber, phoneNumber, name){
         try{
-            const newOperator = new OperatorModel({ email, password });
+            const newOperator = new OperatorModel({ email, password, icNumber, phoneNumber, name });
             return await newOperator.save();
         }catch(err){
             throw err;
@@ -17,6 +18,10 @@ class OperatorServices{
         } catch (error) {
             throw error;
         }
+    }
+
+    static async generateAccessToken(tokenData, secretKey){
+        return jwt.sign(tokenData, secretKey);
     }
 
     static async updateOperatorPassword(email, newPassword) {

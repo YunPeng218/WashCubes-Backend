@@ -5,12 +5,12 @@ const OperatorModel = require('../models/operator');
 
 exports.register = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, icNumber, phoneNumber, name  } = req.body;
         const duplicate = await OperatorServices.checkOperator(email);
         if (duplicate) {
             throw new Error(`Email: ${email}, Already Registered`)
         } else {
-            await OperatorServices.registerOperator(email, password);
+            await OperatorServices.registerOperator(email, password, icNumber, phoneNumber, name );
             res.status(200).json({ status: true, success: 'Operator registered successfully' });
         }
     } catch (err) {
@@ -32,45 +32,13 @@ exports.login = async (req, res, next) => {
             res.status(500).json({ status: false });
             return;
         }
-        res.status(200).json({ status: true });
+        // Creating Token
+        let tokenData = { _id: operator._id, email: operator.email, profilePicUrl: operator.profilePicURL };
+        const token = await OperatorServices.generateAccessToken(tokenData,"secretKey")
+        res.status(200).json({ status: true, token: token });
     } catch (error) {
         console.log(error, 'err---->');
         next(error);
-    }
-}
-
-async function sendOtpEmail(email, otp) {
-    const transporter = nodemailer.createTransport({
-        host: 'smtp-mail.outlook.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: 'washcubes@hotmail.com',
-            pass: 'i3Cubes218'
-        }
-    })
-
-    const content = await transporter.sendMail({
-        from: "washcubes@hotmail.com",
-        to: email,
-        subject: "Reset Your Password",
-        text: 'Your OTP for password reset is ' + otp + '. The OTP generated is valid for 5 minutes.'
-    })
-}
-
-exports.resetPassRequest = async (req, res, next) => {
-    try {
-        const email = req.body.email;
-        const operator = await OperatorServices.checkOperator(email);
-        if (!operator) {
-            res.status(500).json({ status: "NotFound" });
-            return;
-        }
-        otpGenerated = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-        sendOtpEmail(email, otpGenerated);
-        res.status(200).json({ status: "Sent", otp: otpGenerated });
-    } catch (e) {
-        next(e);
     }
 }
 
