@@ -5,12 +5,12 @@ const RiderModel = require('../models/rider');
 
 exports.register = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
-        const duplicate = await RiderServices.checkRider(email);
-        if (duplicate) {
-            throw new Error(`Email: ${email}, Already Registered`)
+        const { email, password, phoneNumber, name, profilePicURL } = req.body;
+        const duplicate = await RiderServices.checkRider(email, phoneNumber);
+        if (duplicate == true) {
+            throw new Error(`Email: ${email} or Phone Number: ${phoneNumber} Already Registered`)
         } else {
-            const response = await RiderServices.registerRider(email, password);
+            const response = await RiderServices.registerRider(email, password, phoneNumber, name, profilePicURL);
             res.status(200).json({ status: true, success: 'Rider registered successfully' });
         }
     } catch (err) {
@@ -100,5 +100,30 @@ exports.getRiderDetails = async (req, res, next) => {
     } catch (error) {
         console.error(error);
         next(error);
+    }
+}
+
+module.exports.displayAllRidersForAdmin = async (req, res) => {
+    try {
+        const riders = await RiderModel.find({});
+        res.status(200).json({ riders });
+    } catch (error) {
+        console.error('Error retrieving riders:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+exports.deleteRiderAccount = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const deletedRider = await RiderModel.findOneAndDelete({ email: email });
+        if (deletedRider) {
+            res.status(200).json({ status: 'Success', message: 'Rider account deleted successfully' });
+        } else {
+            res.status(404).json({ status: 'Not Found', message: 'Rider not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting rider account:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 }
