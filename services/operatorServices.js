@@ -11,14 +11,10 @@ class OperatorServices{
         }
     }
 
-    static async checkOperator(email, phoneNumber, icNumber){
+    static async checkOperator(email){
         try {
-            let operatorWithEmail = await OperatorModel.findOne({ email });
-            let operatorWithPhoneNumber = await OperatorModel.findOne({ phoneNumber });
-            let operatorWithicNumber = await OperatorModel.findOne({ icNumber })
-            if (operatorWithEmail || operatorWithPhoneNumber || operatorWithicNumber) {
-                return true
-            }
+            let operator = await OperatorModel.findOne({ email });
+            return operator;
         } catch (error) {
             throw error;
         }
