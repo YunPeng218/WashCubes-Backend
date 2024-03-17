@@ -11,13 +11,22 @@ class RiderServices{
         }
     }
 
-    static async checkRider(email, phoneNumber){
+    static async checkDuplicate(email, phoneNumber){
         try {
             let riderWithEmail = await RiderModel.findOne({ email });
             let riderWithPhoneNumber = await RiderModel.findOne({ phoneNumber });
             if (riderWithEmail || riderWithPhoneNumber) {
                 return true
             }
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async checkRider(email){
+        try {
+            let rider = await RiderModel.findOne({ email });
+            return rider;
         } catch (error) {
             throw error;
         }

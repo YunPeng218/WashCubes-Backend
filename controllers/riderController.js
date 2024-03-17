@@ -6,7 +6,7 @@ const RiderModel = require('../models/rider');
 exports.register = async (req, res, next) => {
     try {
         const { email, password, phoneNumber, name, profilePicURL } = req.body;
-        const duplicate = await RiderServices.checkRider(email, phoneNumber);
+        const duplicate = await RiderServices.checkDuplicate(email, phoneNumber);
         if (duplicate == true) {
             throw new Error(`Email: ${email} or Phone Number: ${phoneNumber} Already Registered`)
         } else {
