@@ -10,4 +10,6 @@ router.post('/jobs/update-status', jobController.updateOrderStatus)
 
 router.get('/jobs/receiver-details', jobController.getReceiverDetailsByOrder)
 
+router.get('/jobs/order-job-details', jobController.getJobDetailsByOrder)
+
 module.exports = router;

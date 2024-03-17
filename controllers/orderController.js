@@ -6,6 +6,11 @@ const { getAvailableCompartment } = require('../controllers/lockerController');
 const { createJob, createLockerToLaundrySiteJob, createLaundrySiteToLockerJob } = require('../controllers/jobController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
+module.exports.displayAllOrders = async (req, res) => {
+    const orders = await Order.find({});
+    res.status(200).json({ orders });
+}
+
 module.exports.displayUserOrders = async (req, res) => {
     const userId = req.query.userId;
     const orders = await Order.find({
@@ -28,7 +33,8 @@ module.exports.displayOrdersForOperator = async (req, res) => {
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
     const { selectedLockerSiteId, selectedSize } = req.body;
-    const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
+    const allocatedCompartment
+        = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
     if (allocatedCompartment) {
         res.status(200).json({ allocatedCompartment });
     } else {
@@ -132,7 +138,7 @@ module.exports.cancelOrderCreation = async (req, res) => {
 
 // USER CONFIRMS ORDER DROP OFF 
 module.exports.confirmOrderDropOff = async (req, res) => {
-    const { orderId, lockerSiteId, compartmentId } = req.body;
+    const { orderId } = req.body;
     const order = await Order.findById(orderId);
     if (!order) throw new Error('CONFIRM ORDER DROP OFF ERROR');
 
@@ -313,7 +319,6 @@ module.exports.userResolveOrderError = async (req, res) => {
     order.orderStage.inProgress.processing = true;
     order.orderStage.inProgress.dateUpdated = Date.now();
     await order.save();
-    //console.log(order);
 
     res.status(200).json({});
 }

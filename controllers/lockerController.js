@@ -4,9 +4,15 @@ const Locker = require('../models/locker');
 
 // GET LOCKERS
 module.exports.getLockers = async (req, res) => {
-    const lockers = await Locker.find({});
-    console.log(lockers);
-    res.status(200).json({ lockers });
+    if (req.query.lockerSiteId) {
+        const { lockerSiteId } = req.query;
+        const locker = await Locker.findById(lockerSiteId);
+        if (!locker) throw new Error('Locker site not found.');
+        res.status(200).json({ locker });
+    } else {
+        const lockers = await Locker.find({});
+        res.status(200).json({ lockers });
+    }
 }
 
 // GET DROP-OFF AND COLLECTION SITE
@@ -30,28 +36,27 @@ module.exports.getAvailableCompartment = async (selectedLockerSiteId, selectedSi
     const locker = await Locker.findById(selectedLockerSiteId);
     if (!locker) throw new Error('Locker site not found.');
 
-    let selectedCompartment = locker.compartments.find(compartment => compartment.size === selectedSize && compartment.isAvailable);
+    let selectedCompartment
+        = locker.compartments.find(compartment => compartment.size === selectedSize && compartment.isAvailable);
     if (selectedCompartment) {
         selectedCompartment.isAvailable = false;
         await locker.save();
     } else {
-        const sizes = ['Medium', 'Large', 'Extra Large']; // Customize this array based on your size hierarchy
+        const sizes = ['Medium', 'Large', 'Extra Large'];
         for (const size of sizes) {
-            selectedCompartment = locker.compartments.find(compartment => compartment.size === size && compartment.isAvailable);
+            selectedCompartment
+                = locker.compartments.find(compartment => compartment.size === size && compartment.isAvailable);
             if (selectedCompartment) {
                 if (sizes.indexOf(selectedCompartment.size) >= sizes.indexOf(selectedSize)) {
                     selectedCompartment.isAvailable = false;
                     await locker.save();
                     break;
                 } else {
-                    // The found compartment is smaller than the desired size, continue searching
                     selectedCompartment = null;
                 }
             }
         }
     }
-
-    console.log(selectedCompartment)
     return selectedCompartment;
 }
 
@@ -61,28 +66,23 @@ module.exports.getAvailableCompartments = async (req, res) => {
         const lockerSiteId = req.query.lockerSiteId;
         const locker = await Locker.findById(lockerSiteId);
         if (!locker) return;
-
-        // Group compartments by size and count available compartments for each size
-        const availableCompartmentsBySize = locker.compartments.reduce((acc, compartment) => {
-            if (compartment.isAvailable) {
-                if (!acc[compartment.size]) {
-                    acc[compartment.size] = 1;
-                } else {
-                    acc[compartment.size]++;
+        const availableCompartmentsBySize
+            = locker.compartments.reduce((acc, compartment) => {
+                if (compartment.isAvailable) {
+                    if (!acc[compartment.size]) {
+                        acc[compartment.size] = 1;
+                    } else {
+                        acc[compartment.size]++;
+                    }
                 }
-            }
-            return acc;
-        }, {});
-
+                return acc;
+            }, {});
 
         const availableCompartments = {
             lockerId: locker._id,
             lockerName: locker.name,
             availableCompartmentsBySize,
         };
-
-        console.log(availableCompartments);
-
         res.status(200).json({ availableCompartments });
     } catch (error) {
         console.error(error);

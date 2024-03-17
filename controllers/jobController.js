@@ -2,6 +2,7 @@
 const Job = require('../models/job');
 const Order = require('../models/order');
 const Locker = require('../models/locker');
+const Rider = require('../models/rider');
 const { getAvailableCompartment } = require('../controllers/lockerController');
 const { sendNotification } = require('./notificationController');
 
@@ -213,6 +214,37 @@ module.exports.getReceiverDetailsByOrder = async (req, res) => {
             throw new Error('Job Not Found');
         }
         res.status(200).json({ receiverName: job.receiverName, receiverIC: job.receiverIC });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+module.exports.getJobDetailsByOrder = async (req, res) => {
+    try {
+        const { orderId } = req.query;
+        const response = {};
+        const job1 = await Job.findOne({ 'orders._id': orderId, 'jobType': 'Locker To Laundry Site' }).exec();
+        if (job1) {
+            response.receiverName = job1.receiverName;
+            response.receiverIC = job1.receiverIC;
+            const rider = await Rider.findById(job1.rider.toString());
+            if (rider) {
+                response.pickupRiderName = rider.name;
+                response.pickupRiderPhone = rider.phoneNumber;
+            }
+        }
+        const job2 = await Job.findOne({ 'orders._id': orderId, 'jobType': 'Laundry Site to Locker' }).exec();
+
+        if (job2) {
+            const rider = await Rider.findById(job2.rider.toString());
+            if (rider) {
+                response.dropoffRiderName = rider.name;
+                response.dropoffRiderPhone = rider.phoneNumber;
+            }
+        }
+        console.log(response);
+        res.status(200).json({ response });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
