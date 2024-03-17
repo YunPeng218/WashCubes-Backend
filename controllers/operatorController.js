@@ -6,7 +6,7 @@ const OperatorModel = require('../models/operator');
 exports.register = async (req, res, next) => {
     try {
         const { email, password, icNumber, phoneNumber, name, profilePicURL } = req.body;
-        const duplicate = await OperatorServices.checkOperator(email, phoneNumber, icNumber);
+        const duplicate = await OperatorServices.checkDuplicate(email, phoneNumber, icNumber);
         if (duplicate == true) {
             throw new Error(`Email: ${email} or Phone Number: ${phoneNumber} or IC Number: ${icNumber} Already Registered`)
         } else {

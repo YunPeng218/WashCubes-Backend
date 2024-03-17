@@ -11,6 +11,19 @@ class OperatorServices{
         }
     }
 
+    static async checkDuplicate(email, phoneNumber, icNumber){
+        try {
+            let operatorWithEmail = await OperatorModel.findOne({ email });
+            let operatorWithPhoneNumber = await OperatorModel.findOne({ phoneNumber });
+            let operatorWithicNumber = await OperatorModel.findOne({ icNumber })
+            if (operatorWithEmail || operatorWithPhoneNumber || operatorWithicNumber) {
+                return true
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async checkOperator(email){
         try {
             let operator = await OperatorModel.findOne({ email });
