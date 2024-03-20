@@ -39,7 +39,7 @@ class OperatorServices{
 
     static async updateOperatorPassword(email, oldPassword, newPassword) {
         try {
-            const operator = await OpertorModel.findOne({ email });
+            const operator = await OperatorModel.findOne({ email });
             const isPasswordCorrect = await operator.comparePassword(oldPassword);
             if (isPasswordCorrect) {
                 await operator.updatePassword(newPassword);
