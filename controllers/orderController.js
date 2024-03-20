@@ -25,7 +25,8 @@ module.exports.displayOrdersForOperator = async (req, res) => {
             { 'orderStage.inProgress.status': true },
             { 'orderStage.readyForCollection.status': true },
             { 'orderStage.orderError.status': true },
-        ]
+        ],
+        'orderStage.completed.status': false,
     });
     res.status(200).json({ orders });
 }
@@ -220,7 +221,8 @@ module.exports.getOrdersReadyForPickup = async (req, res) => {
 
 module.exports.confirmSelectedPickupOrders = async (req, res) => {
     const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const newJobNumber = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    const newJobNumber
+        = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
     res.status(200).json({ newJobNumber });
 }
 
@@ -238,7 +240,8 @@ module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
 
 module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
     const { lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const { jobNumber, unavailableOrders } = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
+    const { jobNumber, unavailableOrders }
+        = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
     res.status(200).json({ jobNumber, unavailableOrders });
 }
 
@@ -279,7 +282,6 @@ module.exports.operatorEditOrderDetails = async (req, res) => {
     }
 
     await order.save();
-
     res.status(200).json({});
 }
 
