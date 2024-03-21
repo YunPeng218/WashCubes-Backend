@@ -29,6 +29,8 @@ function getProperStatus(orderStatus) {
             return 'in Progress';
         case "collectedByRider":
             return 'Collected by Rider';
+        case "orderError":
+            return 'Having Error';
     }
 }
 

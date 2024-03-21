@@ -281,6 +281,16 @@ module.exports.operatorEditOrderDetails = async (req, res) => {
         order.orderStage.orderError.proofPicUrl.push(proofPicUrlArray[i]);
     }
 
+    // Send push notification to users about their order status update
+    const userId = (order.user.userId).toString();
+    const orderNumber = (order.orderNumber).toString();
+    req.body = {
+        userId,
+        orderStatus: "orderError",
+        orderId: orderNumber
+    };
+    sendNotification(req);
+
     await order.save();
     res.status(200).json({});
 }
@@ -295,7 +305,7 @@ module.exports.operatorConfirmProcessingComplete = async (req, res) => {
     const orderNumber = (order.orderNumber).toString();
     req.body = {
         userId,
-        orderStatus: "Processing Complete",
+        orderStatus: "processingComplete",
         orderId: orderNumber
     };
     sendNotification(req);
