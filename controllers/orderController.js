@@ -290,6 +290,16 @@ module.exports.operatorConfirmProcessingComplete = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) throw new Error('OPERATOR CONFIRM PROCESSING COMPLETE ERROR');
 
+    // Send push notification to users about their order status update
+    const userId = (order.user.userId).toString();
+    const orderNumber = (order.orderNumber).toString();
+    req.body = {
+        userId,
+        orderStatus: "Processing Complete",
+        orderId: orderNumber
+    };
+    sendNotification(req);
+
     order.orderStage.processingComplete.status = true;
     order.orderStage.processingComplete.dateUpdated = Date.now();
     await order.save();
