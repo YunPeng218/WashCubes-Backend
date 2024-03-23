@@ -4,6 +4,7 @@ const Service = require('../models/service');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
 const { createJob, createLockerToLaundrySiteJob, createLaundrySiteToLockerJob } = require('../controllers/jobController');
+const { sendNotification } = require('./notificationController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
 module.exports.displayAllOrders = async (req, res) => {
