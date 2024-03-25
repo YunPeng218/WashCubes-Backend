@@ -1,6 +1,4 @@
 const AdminServices = require('../services/adminServices');
-const nodemailer = require('nodemailer');
-const otpGenerator = require('otp-generator');
 const AdminModel = require('../models/admin');
 
 exports.register = async (req, res, next) => {

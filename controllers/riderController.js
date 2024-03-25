@@ -2,6 +2,7 @@ const RiderServices = require('../services/riderServices');
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 const RiderModel = require('../models/rider');
+require('dotenv').config();
 
 exports.register = async (req, res, next) => {
     try {
@@ -48,8 +49,8 @@ async function sendOtpEmail(email, otp) {
         port: 587,
         secure: false,
         auth: {
-            user: 'washcubes@hotmail.com',
-            pass: 'i3Cubes218'
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_ACCOUNT_PASS
         }
     })
 
