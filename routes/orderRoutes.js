@@ -4,6 +4,7 @@ const router = express.Router({ mergeParams: true });
 const orderController = require('../controllers/orderController');
 
 // USER ORDER ROUTES
+
 router.get('/orders/user', orderController.displayUserOrders)
 router.post('/orders/select-locker-site', orderController.getLockerCompartment);
 router.post('/orders/create-order', orderController.createOrder);
@@ -26,6 +27,8 @@ router.post('/orders/ready-for-pickup/laundry-site', orderController.confirmSele
 router.get('/orders/operator', orderController.displayOrdersForOperator);
 router.post('/orders/operator/approve-order-details', orderController.operatorApproveOrderDetails);
 router.post('/orders/operator/confirm-processing-complete', orderController.operatorConfirmProcessingComplete);
+router.post('/orders/operator/approve-order-return', orderController.operatorApproveOrderReturn);
 router.patch('/orders/operator/edit-order-details', orderController.operatorEditOrderDetails);
+router.get('/orders', orderController.displayAllOrders);
 
 module.exports = router;

@@ -4,8 +4,14 @@ const Service = require('../models/service');
 const Locker = require('../models/locker');
 const { getAvailableCompartment } = require('../controllers/lockerController');
 const { createJob, createLockerToLaundrySiteJob, createLaundrySiteToLockerJob } = require('../controllers/jobController');
+const { sendNotification } = require('./notificationController');
 
 // DISPLAY ALL ORDERS ASSOCIATED WITH USER
+module.exports.displayAllOrders = async (req, res) => {
+    const orders = await Order.find({});
+    res.status(200).json({ orders });
+}
+
 module.exports.displayUserOrders = async (req, res) => {
     const userId = req.query.userId;
     const orders = await Order.find({
@@ -20,7 +26,8 @@ module.exports.displayOrdersForOperator = async (req, res) => {
             { 'orderStage.inProgress.status': true },
             { 'orderStage.readyForCollection.status': true },
             { 'orderStage.orderError.status': true },
-        ]
+        ],
+        'orderStage.completed.status': false,
     });
     res.status(200).json({ orders });
 }
@@ -28,7 +35,8 @@ module.exports.displayOrdersForOperator = async (req, res) => {
 // CHECK AVAILABILITY FOR SELECTED LOCKER SITE
 module.exports.getLockerCompartment = async (req, res) => {
     const { selectedLockerSiteId, selectedSize } = req.body;
-    const allocatedCompartment = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
+    const allocatedCompartment
+        = await getAvailableCompartment(selectedLockerSiteId, selectedSize);
     if (allocatedCompartment) {
         res.status(200).json({ allocatedCompartment });
     } else {
@@ -132,7 +140,7 @@ module.exports.cancelOrderCreation = async (req, res) => {
 
 // USER CONFIRMS ORDER DROP OFF 
 module.exports.confirmOrderDropOff = async (req, res) => {
-    const { orderId, lockerSiteId, compartmentId } = req.body;
+    const { orderId } = req.body;
     const order = await Order.findById(orderId);
     if (!order) throw new Error('CONFIRM ORDER DROP OFF ERROR');
 
@@ -214,7 +222,8 @@ module.exports.getOrdersReadyForPickup = async (req, res) => {
 
 module.exports.confirmSelectedPickupOrders = async (req, res) => {
     const { jobType, lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const newJobNumber = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
+    const newJobNumber
+        = await createLockerToLaundrySiteJob(selectedOrderIds, jobType, lockerSiteId, riderId);
     res.status(200).json({ newJobNumber });
 }
 
@@ -232,7 +241,8 @@ module.exports.getLaundrySiteOrdersReadyForPickup = async (req, res) => {
 
 module.exports.confirmSelectedLaundrySitePickupOrders = async (req, res) => {
     const { lockerSiteId, riderId, selectedOrderIds } = req.body;
-    const { jobNumber, unavailableOrders } = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
+    const { jobNumber, unavailableOrders }
+        = await createLaundrySiteToLockerJob(selectedOrderIds, lockerSiteId, riderId);
     res.status(200).json({ jobNumber, unavailableOrders });
 }
 
@@ -272,8 +282,17 @@ module.exports.operatorEditOrderDetails = async (req, res) => {
         order.orderStage.orderError.proofPicUrl.push(proofPicUrlArray[i]);
     }
 
-    await order.save();
+    // Send push notification to users about their order status update
+    const userId = (order.user.userId).toString();
+    const orderNumber = (order.orderNumber).toString();
+    req.body = {
+        userId,
+        orderStatus: "orderError",
+        orderId: orderNumber
+    };
+    sendNotification(req);
 
+    await order.save();
     res.status(200).json({});
 }
 
@@ -282,6 +301,29 @@ module.exports.operatorConfirmProcessingComplete = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) throw new Error('OPERATOR CONFIRM PROCESSING COMPLETE ERROR');
 
+    // Send push notification to users about their order status update
+    const userId = (order.user.userId).toString();
+    const orderNumber = (order.orderNumber).toString();
+    req.body = {
+        userId,
+        orderStatus: "processingComplete",
+        orderId: orderNumber
+    };
+    sendNotification(req);
+
+    order.orderStage.processingComplete.status = true;
+    order.orderStage.processingComplete.dateUpdated = Date.now();
+    await order.save();
+
+    res.status(200).json({});
+}
+
+module.exports.operatorApproveOrderReturn = async (req, res) => {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error('OPERATOR APPROVE ORDER RETURN ERROR');
+
+    order.orderStage.orderError.returnProcessed = true;
     order.orderStage.processingComplete.status = true;
     order.orderStage.processingComplete.dateUpdated = Date.now();
     await order.save();
@@ -300,7 +342,6 @@ module.exports.userResolveOrderError = async (req, res) => {
     order.orderStage.inProgress.processing = true;
     order.orderStage.inProgress.dateUpdated = Date.now();
     await order.save();
-    //console.log(order);
 
     res.status(200).json({});
 }

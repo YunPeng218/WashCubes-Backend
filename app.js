@@ -18,6 +18,7 @@ const feedbackRoutes = require('./routes/feedbackRoutes');
 const riderRoutes = require('./routes/riderRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const operatorRoutes = require('./routes/operatorRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // EXPRESS APP SETUP
 const PORT = 3000;
@@ -55,6 +56,7 @@ app.use('/', feedbackRoutes);
 app.use('/', riderRoutes);
 app.use('/', jobRoutes);
 app.use('/', operatorRoutes);
+app.use('/', adminRoutes);
 
 // SERVER LISTENING 
 app.listen(PORT, () => {

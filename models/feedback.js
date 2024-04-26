@@ -23,6 +23,11 @@ const feedbackSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
+        },
+        phoneNumber: {
+            type: Number,
+            ref: 'User',
+            required: true,
         }
     },
     starRating: {
